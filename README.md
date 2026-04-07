@@ -3,3 +3,5 @@
 </div>
 
 Mã nguồn App dịch file PDF từ Anh sang Việt. Triển khai trên AI Studio. Có app sẵn để người dùng cá nhân dùng luôn.
+
+Link app: https://ai.studio/apps/bb5c61b7-e110-49aa-933c-04c4ccd18e16?fullscreenApplet=true

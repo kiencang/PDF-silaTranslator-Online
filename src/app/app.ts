@@ -164,6 +164,7 @@ export class App {
       }
     } catch (e) {
       console.error('Không thể đếm token', e);
+      this.error.set('Lỗi khi kiểm tra dung lượng tài liệu. Vui lòng kiểm tra kết nối mạng và thử lại.');
     }
   }
 
@@ -242,7 +243,7 @@ export class App {
   }
 
   private extractHtml(text: string): string {
-    const match = text.match(/```html\s*([\s\S]*?)\s*```/);
+    const match = text.match(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/);
     if (match) {
       return match[1];
     }

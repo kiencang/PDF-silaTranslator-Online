@@ -107,6 +107,8 @@ export class App {
          this.error.set('Vui lòng tải lên tệp PDF hoặc HTML.');
       }
     }
+    // Reset giá trị của input để cho phép chọn lại cùng một file
+    input.value = '';
   }
 
   private handleFile(file: File) {

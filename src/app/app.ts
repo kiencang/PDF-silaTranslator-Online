@@ -238,7 +238,20 @@ export class App {
       this.progressMessage.set('Done!');
     } catch (e: any) {
       console.error(e);
-      this.error.set(e.message || 'Đã xảy ra lỗi trong quá trình xử lý.');
+      const errorMessage = e.message || '';
+      
+      if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
+        this.error.set('Hệ thống AI đang quá tải hoặc đã hết lượt sử dụng miễn phí hôm nay. Vui lòng thử lại sau.');
+      } 
+      else if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+        this.error.set('Máy chủ AI của Google hiện đang bận. Vui lòng chờ vài phút rồi thử lại.');
+      }
+      else if (errorMessage.toLowerCase().includes('safety') || errorMessage.toLowerCase().includes('blocked')) {
+        this.error.set('Tài liệu của bạn bị AI từ chối xử lý do nghi ngờ chứa nội dung vi phạm chính sách an toàn.');
+      }
+      else {
+        this.error.set('Đã xảy ra lỗi kết nối với AI. Vui lòng thử lại.');
+      }
     } finally {
       this.isProcessing.set(false);
     }

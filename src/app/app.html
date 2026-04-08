@@ -6,7 +6,7 @@
         <div class="bg-indigo-600 text-white p-1.5 rounded-lg">
           <lucide-icon [img]="FileText" class="w-5 h-5"></lucide-icon>
         </div>
-        <h1 class="text-xl font-semibold tracking-tight text-slate-900">PDF silaTranslator</h1>
+        <h1 class="text-xl font-semibold tracking-tight text-slate-900">PDF silaTranslator Online</h1>
       </div>
       <div class="flex items-center gap-4 text-sm text-slate-500">
         <span>Powered by Gemini 3.1 Pro</span>
@@ -196,7 +196,7 @@
           
           <!-- Result Header -->
           <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
-            <h2 class="text-sm font-semibold text-slate-900 uppercase tracking-wider">File dịch hoàn chỉnh (Result) • Đọc tốt nhất trên màn hình lớn (laptop/desktop)</h2>
+            <h2 class="text-sm font-semibold text-slate-900 uppercase tracking-wider">Kết quả trả về (Result) • Đọc tốt nhất trên màn hình lớn (laptop/desktop)</h2>
             
             @if (resultHtml()) {
               <div class="flex items-center gap-2">
@@ -243,7 +243,7 @@
               <div class="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-10">
                 <lucide-icon [img]="Loader2" class="w-10 h-10 text-indigo-600 animate-spin mb-4"></lucide-icon>
                 <p class="text-slate-900 font-medium">{{ progressMessage() }}</p>
-                <p class="text-slate-500 text-sm mt-2 max-w-md text-center">Thời gian dịch sẽ cần từ 3 cho đến khoảng 6 phút, tùy thuộc vào độ dài và mức độ phức tạp của nội dung cần dịch.</p>
+                <p class="text-slate-500 text-sm mt-2 max-w-md text-center">Thời gian thao tác sẽ cần từ 3 cho đến khoảng 6 phút, tùy thuộc vào độ dài và mức độ phức tạp của nội dung.</p>
               </div>
             }
 
@@ -257,7 +257,7 @@
             @if (resultHtml()) {
               <div class="absolute inset-0 overflow-hidden">
                 @if (viewMode() === 'preview') {
-                  <iframe id="preview-iframe" class="w-full h-full border-0 bg-white"></iframe>
+                  <iframe id="preview-iframe" class="w-full h-full border-0 bg-white" sandbox="allow-same-origin allow-scripts"></iframe>
                 } @else {
                   <div class="w-full h-full overflow-auto p-4 bg-slate-900 text-slate-300 font-mono text-sm leading-relaxed">
                     <pre><code>{{ resultHtml() }}</code></pre>

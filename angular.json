@@ -34,6 +34,9 @@
             "styles": [
               "src/styles.css"
             ],
+            "allowedCommonJsDependencies": [
+              "node-domexception"
+            ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {

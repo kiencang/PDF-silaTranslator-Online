@@ -6,7 +6,7 @@
         <div class="bg-indigo-600 text-white p-1.5 rounded-lg">
           <lucide-icon [img]="FileText" class="w-5 h-5"></lucide-icon>
         </div>
-        <h1 class="text-xl font-semibold tracking-tight text-slate-900">PDF silaTranslator Online | v1.0.5</h1>
+        <h1 class="text-xl font-semibold tracking-tight text-slate-900">PDF silaTranslator Online | v1.0.6</h1>
       </div>
       <div class="flex items-center gap-4 text-sm text-slate-500">
         <span>Powered by Gemini 3.1 Pro</span>
@@ -21,13 +21,25 @@
       <div class="lg:col-span-4 space-y-6">
         
         <!-- Upload Section -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden" [class.opacity-50]="isProcessing()" [class.pointer-events-none]="isProcessing()">
+          <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
             <h2 class="text-sm font-semibold text-slate-900 uppercase tracking-wider">1. Tải lên tài liệu cần dịch</h2>
+            @if (hasFile() || resultHtml()) {
+              <button (click)="resetApp()" class="text-xs flex items-center gap-1.5 text-slate-500 hover:text-red-600 transition-colors px-2 py-1 rounded hover:bg-red-50">
+                <lucide-icon [img]="Trash2" class="w-3.5 h-3.5"></lucide-icon> Làm mới
+              </button>
+            }
           </div>
           <div class="p-6">
             <div 
-              class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center transition-colors duration-200 cursor-pointer hover:bg-slate-50 hover:border-indigo-400"
+              class="border-2 rounded-xl p-8 text-center transition-all duration-200 cursor-pointer"
+              [class.border-dashed]="!isDragging()"
+              [class.border-solid]="isDragging()"
+              [class.border-slate-300]="!isDragging()"
+              [class.border-indigo-500]="isDragging()"
+              [class.bg-slate-50]="!isDragging()"
+              [class.bg-indigo-50]="isDragging()"
+              [class.scale-[1.02]]="isDragging()"
               (dragover)="onDragOver($event)"
               (dragleave)="onDragLeave($event)"
               (drop)="onDropOverride($event)"
@@ -52,16 +64,35 @@
                   </div>
                 </div>
               } @else {
-                <div class="flex flex-col items-center gap-3">
+                <div class="flex flex-col items-center gap-3 w-full">
                   <div class="p-3 bg-emerald-50 text-emerald-600 rounded-full">
                     <lucide-icon [img]="CheckCircle2" class="w-6 h-6"></lucide-icon>
                   </div>
-                  <div>
-                    <p class="text-sm font-medium text-slate-900 truncate max-w-[200px]">{{ selectedFile()?.name }}</p>
+                  <div class="text-center w-full">
+                    <p class="text-sm font-medium text-slate-900 truncate max-w-[200px] mx-auto">{{ selectedFile()?.name }}</p>
                     <p class="text-xs text-slate-500 mt-1">{{ (selectedFile()!.size / 1024 / 1024).toFixed(2) }} MB</p>
                   </div>
-                  <button class="text-xs text-indigo-600 hover:text-indigo-700 font-medium mt-2" (click)="fileInput.click(); $event.stopPropagation()">
-                    Change file
+                  
+                  @if (tokenCount() > 0) {
+                    <div class="w-full max-w-[240px] mt-2">
+                      <div class="flex justify-between text-[10px] uppercase tracking-wider font-semibold mb-1.5">
+                        <span class="text-slate-500">Token Usage</span>
+                        <span [class.text-emerald-600]="tokenCount() < 20000" [class.text-amber-500]="tokenCount() >= 20000 && tokenCount() <= 25000" [class.text-red-600]="tokenCount() > 25000">
+                          {{ tokenCount() }} / 25K
+                        </span>
+                      </div>
+                      <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                        <div class="h-1.5 rounded-full transition-all duration-700 ease-out"
+                             [style.width.%]="tokenPercentage()"
+                             [class.bg-emerald-500]="tokenCount() < 20000"
+                             [class.bg-amber-500]="tokenCount() >= 20000 && tokenCount() <= 25000"
+                             [class.bg-red-500]="tokenCount() > 25000"></div>
+                      </div>
+                    </div>
+                  }
+
+                  <button class="text-xs text-indigo-600 hover:text-indigo-700 font-medium mt-1" (click)="fileInput.click(); $event.stopPropagation()">
+                    Thay đổi file
                   </button>
                 </div>
               }
@@ -191,12 +222,12 @@
       </div>
 
       <!-- Right Column: Results -->
-      <div class="lg:col-span-8">
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 h-full flex flex-col overflow-hidden min-h-[600px]">
+      <div class="lg:col-span-8 lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]">
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 h-full flex flex-col overflow-hidden min-h-[600px] lg:min-h-0">
           
           <!-- Result Header -->
           <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
-            <h2 class="text-sm font-semibold text-slate-900 uppercase tracking-wider">Kết quả trả về (Result) • Đọc tốt nhất trên màn hình lớn (laptop/desktop) • Nên tải file về để lưu trữ & xem lại tốt hơn • Đọc được trên mọi trình duyệt phổ biến (Chrome, Safari, v.v..)</h2>
+            <h2 class="text-sm font-semibold text-slate-900 uppercase tracking-wider">Kết quả trả về (Result) • Đọc tốt nhất trên màn hình lớn (laptop/desktop) • Nên tải file về để lưu trữ & xem lại • Đọc được trên mọi trình duyệt phổ biến (Chrome, Safari, v.v..)</h2>
             
             @if (resultHtml()) {
               <div class="flex items-center gap-2">
@@ -234,8 +265,9 @@
                     <lucide-icon [img]="Copy" class="w-4 h-4"></lucide-icon>
                   }
                 </button>
-                <button (click)="downloadHtml()" class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Download HTML">
-                  <lucide-icon [img]="Download" class="w-4 h-4"></lucide-icon>
+                <button (click)="downloadHtml()" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 rounded-md transition-colors flex items-center gap-1.5 text-xs font-medium shadow-sm" title="Download HTML">
+                  <lucide-icon [img]="Download" class="w-3.5 h-3.5"></lucide-icon>
+                  Tải file HTML
                 </button>
               </div>
             }
@@ -244,10 +276,27 @@
           <!-- Result Content -->
           <div class="flex-1 relative bg-slate-50/50">
             @if (isProcessing()) {
-              <div class="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-10">
-                <lucide-icon [img]="Loader2" class="w-10 h-10 text-indigo-600 animate-spin mb-4"></lucide-icon>
-                <p class="text-slate-900 font-medium">{{ progressMessage() }}</p>
-                <p class="text-slate-500 text-sm mt-2 max-w-md text-center">Thời gian thao tác sẽ cần từ 3 cho đến khoảng 6 phút, tùy thuộc vào độ dài và mức độ phức tạp của nội dung.</p>
+              <div class="absolute inset-0 bg-white z-10 flex flex-col">
+                <!-- Overlay with spinner -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center bg-white/40 z-20">
+                  <lucide-icon [img]="Loader2" class="w-10 h-10 text-indigo-600 animate-spin mb-4"></lucide-icon>
+                  <p class="text-slate-900 font-medium">{{ progressMessage() }}</p>
+                  <p class="text-slate-500 text-sm mt-2 max-w-md text-center">Thời gian thao tác sẽ cần từ 3 cho đến khoảng 6 phút, tùy thuộc vào độ dài và mức độ phức tạp của nội dung.</p>
+                </div>
+                <!-- Skeleton UI -->
+                <div class="p-8 space-y-8 animate-pulse">
+                  <div class="h-8 bg-slate-200 rounded-lg w-3/4"></div>
+                  <div class="space-y-4">
+                    <div class="h-4 bg-slate-200 rounded w-full"></div>
+                    <div class="h-4 bg-slate-200 rounded w-full"></div>
+                    <div class="h-4 bg-slate-200 rounded w-5/6"></div>
+                  </div>
+                  <div class="space-y-4 pt-4">
+                    <div class="h-4 bg-slate-200 rounded w-full"></div>
+                    <div class="h-4 bg-slate-200 rounded w-4/5"></div>
+                  </div>
+                  <div class="h-40 bg-slate-100 rounded-xl border border-slate-100 mt-8"></div>
+                </div>
               </div>
             }
 
@@ -261,7 +310,7 @@
             @if (resultHtml()) {
               <div class="absolute inset-0 overflow-hidden">
                 @if (viewMode() === 'preview') {
-                  <iframe id="preview-iframe" class="w-full h-full border-0 bg-white" sandbox="allow-same-origin allow-scripts"></iframe>
+                  <iframe id="preview-iframe" class="w-full h-full border-0 bg-white" sandbox="allow-scripts"></iframe>
                 } @else {
                   <div class="w-full h-full overflow-auto p-4 bg-slate-900 text-slate-300 font-mono text-sm leading-relaxed">
                     <pre><code>{{ resultHtml() }}</code></pre>

@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, inject, computed, effect } 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GeminiService } from './gemini.service';
-import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, Copy, Eye, Code, ArrowDown } from 'lucide-angular';
+import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, Copy, Eye, Code, ArrowDown, Trash2 } from 'lucide-angular';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -33,6 +33,7 @@ export class App {
   readonly Eye = Eye;
   readonly Code = Code;
   readonly ArrowDown = ArrowDown;
+  readonly Trash2 = Trash2;
 
   readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   readonly MAX_TOKENS = 25000;
@@ -53,10 +54,13 @@ export class App {
   resultHtml = signal<string | null>(null);
   viewMode = signal<'preview' | 'code'>('preview');
   isCopied = signal<boolean>(false);
+  isDragging = signal<boolean>(false);
+  tokenCount = signal<number>(0);
 
   // Computed
   hasFile = computed(() => this.selectedFile() !== null);
   canProcess = computed(() => this.hasFile() && !this.isProcessing());
+  tokenPercentage = computed(() => Math.min((this.tokenCount() / this.MAX_TOKENS) * 100, 100));
 
   constructor() {
     effect(() => {
@@ -69,22 +73,19 @@ export class App {
   onDragOver(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-    const dropzone = event.currentTarget as HTMLElement;
-    dropzone.classList.add('border-indigo-500', 'bg-indigo-50');
+    this.isDragging.set(true);
   }
 
   onDragLeave(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-    const dropzone = event.currentTarget as HTMLElement;
-    dropzone.classList.remove('border-indigo-500', 'bg-indigo-50');
+    this.isDragging.set(false);
   }
 
   onDropOverride(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-    const dropzone = event.currentTarget as HTMLElement;
-    dropzone.classList.remove('border-indigo-500', 'bg-indigo-50');
+    this.isDragging.set(false);
 
     if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
       const file = event.dataTransfer.files[0];
@@ -170,6 +171,7 @@ export class App {
   private async checkTokenLimit(base64String: string, mimeType: string) {
     try {
       const tokens = await this.geminiService.countTokens(base64String, mimeType);
+      this.tokenCount.set(tokens);
       if (tokens > this.MAX_TOKENS) {
         this.error.set(`Warning: Tài liệu quá lớn (${tokens} tokens). Lượng tokens tối đa của file đầu vào được phép là 25,000 tokens.`);
         this.selectedFile.set(null);
@@ -304,6 +306,15 @@ export class App {
       this.isCopied.set(true);
       setTimeout(() => this.isCopied.set(false), 2000);
     }
+  }
+
+  resetApp() {
+    this.selectedFile.set(null);
+    this.fileBase64.set(null);
+    this.resultHtml.set(null);
+    this.error.set(null);
+    this.tokenCount.set(0);
+    this.progressMessage.set('');
   }
 
   downloadHtml() {

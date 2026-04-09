@@ -255,7 +255,7 @@ export class App {
       const currentMode = this.mode();
 
       if (currentMode === 'x_math') {
-        this.progressMessage.set('Dịch PDF sang HTML (Không công thức toán / Không biểu đồ toán)...');
+        this.progressMessage.set('Dịch file PDF sang tiếng Việt (Tài liệu khoa học xã hội)...');
         const [instruction, prompt] = await Promise.all([
           this.loadPrompt('system_instructions_x_math.md'),
           this.loadPrompt('prompt_x_math.md')
@@ -264,7 +264,7 @@ export class App {
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'x_svg') {
-        this.progressMessage.set('Dịch PDF sang HTML (Có công thức toán học / Không biểu đồ toán)...');
+        this.progressMessage.set('Dịch file PDF sang tiếng Việt (Tài liệu khoa học nói chung)...');
         const [instruction, prompt] = await Promise.all([
           this.loadPrompt('system_instructions_x_svg.md'),
           this.loadPrompt('prompt_x_svg.md')
@@ -273,7 +273,7 @@ export class App {
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'normal') {
-        this.progressMessage.set('Dịch PDF sang HTML (Có công thức toán học / Có biểu đồ toán)...');
+        this.progressMessage.set('Dịch file PDF sang tiếng Việt (Tài liệu toán chuyên ngành)...');
         const [instruction, prompt] = await Promise.all([
           this.loadPrompt('system_instructions.md'),
           this.loadPrompt('prompt.md')
@@ -282,7 +282,7 @@ export class App {
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'phase1') {
-        this.progressMessage.set('Chuyển PDF sang HTML (English)...');
+        this.progressMessage.set('Chuyển định dạng PDF sang HTML (English / Giữ nguyên nội dung)...');
         const [instruction, prompt] = await Promise.all([
           this.loadPrompt('system_instructions_phase_1.md'),
           this.loadPrompt('prompt_phase_1.md')
@@ -295,7 +295,7 @@ export class App {
            throw new Error("Phase 2 cần đầu vào là định dạng HTML. Hãy tải file HTML lên.");
         }
         
-        this.progressMessage.set('Dịch HTML sang Tiếng Việt...');
+        this.progressMessage.set('Dịch file HTML sang Tiếng Việt...');
         const [instruction, prompt] = await Promise.all([
           this.loadPrompt('system_instructions_phase_2.md'),
           this.loadPrompt('prompt_phase_2.md')

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/app-dich-intro.png" alt="Giao diện của công cụ dịch">
+  <img src="images/app-dich-intro.png" alt="Giao diện của công cụ dịch...">
    <br><em>Một file được dịch bởi công cụ</em>
 </p>
 

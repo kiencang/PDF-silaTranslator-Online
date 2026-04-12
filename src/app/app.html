@@ -8,7 +8,7 @@
         </div>
         <h1 class="text-2xl font-semibold tracking-tight text-slate-900 flex items-baseline gap-2">
           PDF silaTranslator Online
-          <span class="text-sm font-medium text-slate-400 tracking-normal">v1.0.20</span>
+          <span class="text-sm font-medium text-slate-400 tracking-normal">v1.0.21</span>
         </h1>
       </div>
       
@@ -126,7 +126,7 @@
                       <span class="block my-0.5">hoặc</span>
                       <span class="block">Kéo thả vào đây</span>
                     </p>
-                    <p class="text-xs text-slate-600 mt-2">PDF hoặc HTML [max 25 trang / 5MB / 25K token]</p>
+                    <p class="text-xs text-slate-600 mt-2">PDF (max 25K token) hoặc HTML (max 35K token) [5MB]</p>
                   </div>
                 </div>
               } @else {
@@ -169,17 +169,17 @@
                           }
                         </span>
                         @if (!isCountingTokens()) {
-                          <span [class.text-emerald-600]="tokenCount() < 20000" [class.text-amber-500]="tokenCount() >= 20000 && tokenCount() <= 25000" [class.text-red-600]="tokenCount() > 25000">
-                            {{ tokenCount() }} / 25K
+                          <span [class.text-emerald-600]="tokenCount() < currentMaxTokens() * 0.8" [class.text-amber-500]="tokenCount() >= currentMaxTokens() * 0.8 && tokenCount() <= currentMaxTokens()" [class.text-red-600]="tokenCount() > currentMaxTokens()">
+                            {{ tokenCount() | number }} / {{ currentMaxTokens() / 1000 }}K
                           </span>
                         }
                       </div>
                       <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
                         <div class="h-1.5 rounded-full transition-all duration-700 ease-out"
                              [style.width.%]="tokenPercentage()"
-                             [class.bg-emerald-500]="tokenCount() < 20000"
-                             [class.bg-amber-500]="tokenCount() >= 20000 && tokenCount() <= 25000"
-                             [class.bg-red-500]="tokenCount() > 25000"></div>
+                             [class.bg-emerald-500]="tokenCount() < currentMaxTokens() * 0.8"
+                             [class.bg-amber-500]="tokenCount() >= currentMaxTokens() * 0.8 && tokenCount() <= currentMaxTokens()"
+                             [class.bg-red-500]="tokenCount() > currentMaxTokens()"></div>
                       </div>
                     </div>
                   }

@@ -57,7 +57,8 @@ export class App {
   readonly Scissors = Scissors;
 
   readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  readonly MAX_TOKENS = 25000;
+  readonly MAX_PDF_TOKENS = 25000;
+  readonly MAX_HTML_TOKENS = 35000;
   private promptCache = new Map<string, string>();
 
   // State
@@ -108,9 +109,10 @@ export class App {
   @ViewChild('resetBtn') resetBtn?: ElementRef<HTMLButtonElement>;
 
   // Computed
+  currentMaxTokens = computed(() => this.mimeType() === 'text/html' ? this.MAX_HTML_TOKENS : this.MAX_PDF_TOKENS);
   hasFile = computed(() => this.selectedFile() !== null);
-  canProcess = computed(() => this.hasFile() && !this.isProcessing() && !this.isCountingTokens() && this.tokenCount() <= this.MAX_TOKENS);
-  tokenPercentage = computed(() => Math.min((this.tokenCount() / this.MAX_TOKENS) * 100, 100));
+  canProcess = computed(() => this.hasFile() && !this.isProcessing() && !this.isCountingTokens() && this.tokenCount() <= this.currentMaxTokens());
+  tokenPercentage = computed(() => Math.min((this.tokenCount() / this.currentMaxTokens()) * 100, 100));
   visibleHistory = computed(() => {
     const fullHistory = this.history();
     return this.isHistoryExpanded() ? fullHistory : fullHistory.slice(0, 3);
@@ -365,8 +367,9 @@ export class App {
     try {
       const tokens = await this.geminiService.countTokens(base64String, mimeType);
       this.tokenCount.set(tokens);
-      if (tokens > this.MAX_TOKENS) {
-        this.showToast('error', `Lỗi: Nội dung vượt quá giới hạn 25.000 tokens (${tokens} tokens). Vui lòng cắt bớt trang.`);
+      const maxTokens = this.currentMaxTokens();
+      if (tokens > maxTokens) {
+        this.showToast('error', `Lỗi: Nội dung vượt quá giới hạn ${maxTokens.toLocaleString()} tokens (${tokens.toLocaleString()} tokens). Vui lòng cắt bớt trang hoặc giảm dung lượng.`);
       }
     } catch (e) {
       console.error('Không thể đếm token', e);

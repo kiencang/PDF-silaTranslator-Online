@@ -1,6 +1,6 @@
 > ### ⚠️ Tuyên bố từ chối trách nhiệm
 > 
-> Bằng việc sử dụng công cụ này, người dùng xác nhận và đồng ý rằng:
+> Bằng việc sử dụng công cụ này (**PDF-silaTranslator-Online**), người dùng xác nhận và đồng ý rằng:
 > 
 > - **Độ chính xác của AI:** Nội dung được dịch tự động bởi mô hình AI. Trí tuệ nhân tạo có thể "ảo tưởng" (hallucination) hoặc dịch sai ngữ cảnh, đặc biệt với các thuật ngữ chuyên ngành cực mới hoặc từ lóng. Bản dịch chỉ mang tính chất tham khảo.
 > - **Không thay thế chuyên gia:** Tuyệt đối không sử dụng kết quả dịch cho các mục đích có tính rủi ro cao như: hồ sơ pháp lý, chẩn đoán y khoa, tài chính, hoặc hướng dẫn vận hành kỹ thuật nguy hiểm.

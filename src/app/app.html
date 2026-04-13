@@ -8,7 +8,7 @@
         </div>
         <h1 class="text-2xl font-semibold tracking-tight text-slate-900 flex items-baseline gap-2">
           PDF silaTranslator Online
-          <span class="text-sm font-medium text-slate-400 tracking-normal">v1.0.22</span>
+          <span class="text-sm font-medium text-slate-400 tracking-normal">v1.0.23</span>
         </h1>
       </div>
       
@@ -36,7 +36,7 @@
             [attr.aria-expanded]="translatedQuery() ? 'true' : 'false'"
             aria-controls="search-results"
             class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-full leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500 sm:text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed" 
-            placeholder="Nhập từ khóa tiếng Việt để tìm tài liệu..."
+            placeholder="Nhập từ khóa tiếng Việt để tìm tài liệu trên Scholar..."
           >
           
           <span class="sr-only" aria-live="polite">
@@ -122,11 +122,14 @@
                   </div>
                   <div class="text-center">
                     <p class="text-sm font-medium text-slate-900">
-                      <span class="block">Click vào để tải lên tài liệu</span>
+                      <span class="block">Click vào để tải tài liệu lên</span>
                       <span class="block my-0.5">hoặc</span>
                       <span class="block">Kéo thả vào đây</span>
                     </p>
-                    <p class="text-xs text-slate-600 mt-2">PDF (max 25K token) hoặc HTML (max 35K token) [5MB]</p>
+                    <p class="text-xs text-slate-600 mt-2">
+                      <span class="block">PDF (max 25 trang / 25K token / 5MB)</span>
+                      <span class="block">HTML (max 35K token)</span>
+                    </p>
                   </div>
                 </div>
               } @else {

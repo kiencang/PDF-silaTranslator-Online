@@ -70,6 +70,7 @@ export class App {
   temperatureControl = new FormControl<number>(0.3, { nonNullable: true });
 
   mode = signal<TranslationMode>('zero_svg');
+  isTwoPhaseMode = computed(() => this.mode() === 'phase1' || this.mode() === 'phase2');
   temperature = signal<number>(0.3);
   
   isProcessing = signal<boolean>(false);
@@ -123,6 +124,12 @@ export class App {
     const s = (totalSeconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   });
+
+  selectTwoPhaseMode() {
+    if (!this.isTwoPhaseMode()) {
+      this.modeControl.setValue('phase1');
+    }
+  }
 
   constructor() {
     this.modeControl.valueChanges.subscribe(val => this.mode.set(val));

@@ -8,7 +8,7 @@
         </div>
         <h1 class="text-2xl font-semibold tracking-tight text-slate-900 flex items-baseline gap-2">
           PDF silaTranslator Online
-          <span class="text-sm font-medium text-slate-400 tracking-normal">v1.0.23</span>
+          <span class="text-sm font-medium text-slate-400 tracking-normal">v1.0.24</span>
         </h1>
       </div>
       
@@ -260,22 +260,22 @@
               <fieldset class="space-y-2" aria-labelledby="mode-group-label">
                 <legend class="sr-only">Chọn chế độ dịch</legend>
                 <label class="flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-colors hover:bg-slate-50"
-                       [class.border-indigo-600]="mode() === 'x_math'"
-                       [class.bg-indigo-50]="mode() === 'x_math'">
-                  <input type="radio" name="mode" value="x_math" [formControl]="modeControl" class="mt-1 text-indigo-600 focus:ring-indigo-600" aria-describedby="desc-x-math">
+                       [class.border-indigo-600]="mode() === 'zero_math'"
+                       [class.bg-indigo-50]="mode() === 'zero_math'">
+                  <input type="radio" name="mode" value="zero_math" [formControl]="modeControl" class="mt-1 text-indigo-600 focus:ring-indigo-600" aria-describedby="desc-zero-math">
                   <div>
                     <div class="text-sm font-medium text-slate-900">Tài liệu khoa học xã hội</div>
-                    <div id="desc-x-math" class="text-xs text-slate-600 mt-0.5">PDF -> HTML (VI). <strong>Không công thức toán / Không đồ thị toán</strong>.</div>
+                    <div id="desc-zero-math" class="text-xs text-slate-600 mt-0.5">PDF -> HTML (VI). <strong>Không công thức toán / Không đồ thị toán</strong>.</div>
                   </div>
                 </label>
 
                 <label class="flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-colors hover:bg-slate-50"
-                       [class.border-indigo-600]="mode() === 'x_svg'"
-                       [class.bg-indigo-50]="mode() === 'x_svg'">
-                  <input type="radio" name="mode" value="x_svg" [formControl]="modeControl" class="mt-1 text-indigo-600 focus:ring-indigo-600" aria-describedby="desc-x-svg">
+                       [class.border-indigo-600]="mode() === 'zero_svg'"
+                       [class.bg-indigo-50]="mode() === 'zero_svg'">
+                  <input type="radio" name="mode" value="zero_svg" [formControl]="modeControl" class="mt-1 text-indigo-600 focus:ring-indigo-600" aria-describedby="desc-zero-svg">
                   <div>
                     <div class="text-sm font-medium text-slate-900">Tài liệu khoa học nói chung</div>
-                    <div id="desc-x-svg" class="text-xs text-slate-600 mt-0.5">PDF -> HTML (VI). Có công thức toán nhưng không gồm đồ thị toán phức tạp. <strong>Đa phần các tài liệu khoa học nên chọn tùy chọn này</strong>.</div>
+                    <div id="desc-zero-svg" class="text-xs text-slate-600 mt-0.5">PDF -> HTML (VI). Có công thức toán nhưng không gồm đồ thị toán phức tạp. <strong>Đa phần các tài liệu khoa học nên chọn tùy chọn này</strong>.</div>
                   </div>
                 </label>
 

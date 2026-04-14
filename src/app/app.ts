@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PDFDocument } from 'pdf-lib';
 
-type TranslationMode = 'x_math' | 'x_svg' | 'normal' | 'phase1' | 'phase2';
+type TranslationMode = 'zero_math' | 'zero_svg' | 'normal' | 'phase1' | 'phase2';
 
 interface Toast {
   id: number;
@@ -66,10 +66,10 @@ export class App {
   fileBase64 = signal<string | null>(null);
   mimeType = signal<string>('');
   
-  modeControl = new FormControl<TranslationMode>('x_svg', { nonNullable: true });
+  modeControl = new FormControl<TranslationMode>('zero_svg', { nonNullable: true });
   temperatureControl = new FormControl<number>(0.3, { nonNullable: true });
 
-  mode = signal<TranslationMode>('x_svg');
+  mode = signal<TranslationMode>('zero_svg');
   temperature = signal<number>(0.3);
   
   isProcessing = signal<boolean>(false);
@@ -411,20 +411,20 @@ export class App {
       const temp = this.temperature();
       const currentMode = this.mode();
 
-      if (currentMode === 'x_math') {
+      if (currentMode === 'zero_math') {
         this.progressMessage.set('Dịch file PDF sang tiếng Việt (Tài liệu khoa học xã hội)...');
         const [instruction, prompt] = await Promise.all([
-          this.loadPrompt('system_instructions_x_math.md'),
-          this.loadPrompt('prompt_x_math.md')
+          this.loadPrompt('system_instructions_zero_math.md'),
+          this.loadPrompt('prompt_zero_math.md')
         ]);
         const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp);
         this.resultHtml.set(this.extractHtml(result));
       }
-      else if (currentMode === 'x_svg') {
+      else if (currentMode === 'zero_svg') {
         this.progressMessage.set('Dịch file PDF sang tiếng Việt (Tài liệu khoa học nói chung)...');
         const [instruction, prompt] = await Promise.all([
-          this.loadPrompt('system_instructions_x_svg.md'),
-          this.loadPrompt('prompt_x_svg.md')
+          this.loadPrompt('system_instructions_zero_svg.md'),
+          this.loadPrompt('prompt_zero_svg.md')
         ]);
         const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp);
         this.resultHtml.set(this.extractHtml(result));

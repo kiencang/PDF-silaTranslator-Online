@@ -8,7 +8,7 @@
         </div>
         <h1 class="text-2xl font-semibold tracking-tight text-slate-900 flex items-baseline gap-2">
           PDF silaTranslator Online
-          <span class="text-sm font-medium text-slate-400 tracking-normal">v1.0.25</span>
+          <span class="text-sm font-medium text-slate-400 tracking-normal">v1.0.26</span>
         </h1>
       </div>
       
@@ -188,7 +188,8 @@
                     </div>
                   }
 
-                  <button class="text-xs text-indigo-600 hover:text-indigo-700 font-medium mt-1" (click)="fileInput.click(); $event.stopPropagation()">
+                  <button class="inline-flex items-center gap-1.5 px-3 py-1.5 mt-2 text-xs font-medium text-slate-600 bg-transparent border border-slate-300 hover:bg-white hover:text-slate-900 hover:shadow-sm rounded-md transition-all" (click)="fileInput.click(); $event.stopPropagation()">
+                    <lucide-icon [img]="FileEdit" class="w-3.5 h-3.5" aria-hidden="true"></lucide-icon>
                     Thay đổi file
                   </button>
                 </div>
@@ -216,7 +217,7 @@
                 
                 <p class="text-[11px] text-slate-500 mb-3 flex items-start gap-1.5 bg-slate-50 p-2 rounded-lg border border-slate-100">
                   <lucide-icon [img]="AlertCircle" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true"></lucide-icon>
-                  Lịch sử dịch chỉ lưu cục bộ tại trình duyệt của bạn, đảm bảo an toàn và bảo mật tuyệt đối.
+                  Lịch sử dịch chỉ lưu cục bộ tại trình duyệt của bạn, đảm bảo an toàn và bảo mật. Ngoài ra chỉ tên file được lưu lại.
                 </p>
 
                 <ul class="space-y-2">

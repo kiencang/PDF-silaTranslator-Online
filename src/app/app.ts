@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, inject, computed, effect, V
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { GeminiService } from './gemini.service';
-import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, ArrowDown, Maximize, Minimize, Clock, RefreshCw, Info, X, Search, ExternalLink, History, Trash2, ChevronDown, ChevronUp, Scissors } from 'lucide-angular';
+import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, ArrowDown, Maximize, Minimize, Clock, RefreshCw, Info, X, Search, ExternalLink, History, Trash2, ChevronDown, ChevronUp, Scissors, FileEdit } from 'lucide-angular';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PDFDocument } from 'pdf-lib';
@@ -55,6 +55,7 @@ export class App {
   readonly ChevronDown = ChevronDown;
   readonly ChevronUp = ChevronUp;
   readonly Scissors = Scissors;
+  readonly FileEdit = FileEdit;
 
   readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   readonly MAX_PDF_TOKENS = 25000;
@@ -132,7 +133,20 @@ export class App {
   }
 
   constructor() {
-    this.modeControl.valueChanges.subscribe(val => this.mode.set(val));
+    if (typeof localStorage !== 'undefined') {
+      const savedMode = localStorage.getItem('sila_preferred_translation_mode') as TranslationMode;
+      if (savedMode && ['zero_math', 'zero_svg', 'normal', 'phase1', 'phase2'].includes(savedMode)) {
+        this.modeControl.setValue(savedMode, { emitEvent: false });
+        this.mode.set(savedMode);
+      }
+    }
+
+    this.modeControl.valueChanges.subscribe(val => {
+      this.mode.set(val);
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('sila_preferred_translation_mode', val);
+      }
+    });
     this.temperatureControl.valueChanges.subscribe(val => this.temperature.set(val));
 
     afterNextRender(() => {

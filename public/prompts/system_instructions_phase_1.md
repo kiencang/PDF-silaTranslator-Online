@@ -207,45 +207,11 @@ Ví dụ về Output lý tưởng:
     <title>Tiêu đề của bài viết</title>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-    
-        *, *::before, *::after { box-sizing: border-box; }
-        body { 
-            font-family: 'Noto Sans', Roboto, Arial, sans-serif; 
-            font-size: 18px; 
-            line-height: 1.6; 
-            color: #222; 
-            max-width: 900px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            overflow-wrap: break-word; 
-        }
-        img, svg, video { max-width: 100%; height: auto; object-fit: contain; display: block; margin: 1.5rem auto; }
+        /* BẮT BUỘC: CHÈN NGUYÊN VĂN KHỐI "CSS FRAMEWORK CƠ BẢN" TỪ PHẦN "Tái tạo Tài liệu Kỹ thuật số Nâng cao (PDF sang HTML/CSS)" VÀO ĐÂY */
 
-        /* Bảo vệ Bảng */
-        .table-wrapper { width: 100%; overflow-x: auto; margin-bottom: 1.5rem; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: top; }
-        th { background-color: #f8f9fa; font-weight: bold; }
-        .ws-nowrap { white-space: nowrap; } 
+        /* Bắt đầu: Khối CSS bổ sung do AI tự viết để tái tạo layout (nếu cần) */
         
-        /* Bảo vệ Bố cục nhiều cột cho nội dung phụ, bổ trợ */
-        .grid-2col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; align-items: start; }
-        .grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; align-items: start; }
-        .grid-4col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; align-items: start; }
-        .flex-columns { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.5rem; }
-        .flex-column-item { flex: 1; min-width: 300px; }        
-
-        /* Bảo vệ Code Blocks & Text nguyên bản */
-        pre { background-color: #f4f5f7; padding: 15px; overflow-x: auto; border-radius: 4px; }
-        code { font-family: Consolas, Monaco, 'Courier New', monospace; font-size: 0.9em; background-color: #f4f5f7; padding: 2px 4px; border-radius: 3px; }
-        pre code { background-color: transparent; padding: 0; }
-
-        /* Tối ưu in ấn */
-        p, li { orphans: 3; widows: 3; }
-        h1, h2, h3, h4, h5, h6 { break-after: avoid; page-break-after: avoid; line-height: 1.3; margin-top: 1.5em; }
-
-        /* CSS bổ sung thêm bên dưới để layout trang hoàn chỉnh*/
+        /* Kết thúc: Khối CSS bổ sung */
     </style>
 </head>
 <body>

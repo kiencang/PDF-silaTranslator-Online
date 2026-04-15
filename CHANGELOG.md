@@ -13,6 +13,7 @@ Ví dụ 1.0.19.i nghĩa là phiên bản này có lõi giống y phiên bản 1
 
 ### Fixed
 - Thao tác DOM trực tiếp (Anti-pattern trong Angular).
+- Quản lý bộ nhớ (Memory Leak) cho một số tác vụ chạy ngầm.
 
 ## [1.0.29] - 2026-04-15
 

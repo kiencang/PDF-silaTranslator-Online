@@ -202,14 +202,38 @@
         </section>
 
         <!-- Configuration Section -->
-        <section class="bg-white rounded-2xl ring-1 ring-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden transition-opacity duration-300"
+        <section class="bg-white rounded-2xl ring-1 ring-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative transition-opacity duration-300"
                  [class.opacity-50]="isProcessing()" 
                  [class.pointer-events-none]="isProcessing()">
-          <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3 rounded-t-2xl">
             <h2 class="text-sm font-semibold text-slate-900 uppercase tracking-wider">2. Cấu hình</h2>
-            <button (click)="openSettings()" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Thay đổi chế độ mặc định">
-              <lucide-icon [img]="Settings" class="w-4.5 h-4.5" aria-hidden="true"></lucide-icon>
-            </button>
+            <div class="flex items-center gap-3 ml-auto">
+              @if (mode() !== 'phase1') {
+                <label class="flex items-center gap-2 cursor-pointer group relative">
+                  <span class="text-xs font-medium transition-colors" [class.text-indigo-600]="useGoogleSearch()" [class.text-slate-500]="!useGoogleSearch()">+Search</span>
+                  <div class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2">
+                    <input type="checkbox" [formControl]="useGoogleSearchControl" class="peer sr-only">
+                    <div class="h-full w-full rounded-full transition-colors duration-200 ease-in-out" [class.bg-indigo-600]="useGoogleSearch()" [class.bg-slate-200]="!useGoogleSearch()"></div>
+                    <span class="pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" [class.translate-x-4]="useGoogleSearch()" [class.translate-x-0]="!useGoogleSearch()"></span>
+                  </div>
+                  <!-- Tooltip -->
+                  <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden w-[240px] group-hover:block z-50 pointer-events-none">
+                    <div class="bg-slate-800 text-white font-normal leading-relaxed text-xs rounded-lg py-2 px-3 shadow-xl relative text-center">
+                      @if (useGoogleSearch()) {
+                        <span class="font-semibold text-emerald-400">[Đang Bật]</span>
+                      } @else {
+                        <span class="font-semibold text-slate-400">[Đang Tắt]</span>
+                      }
+                      Bổ sung công cụ tìm kiếm cho AI, giúp quá trình dịch tốt hơn. Tuy vậy sẽ tốn thời gian và token hơn.
+                      <div class="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-slate-800"></div>
+                    </div>
+                  </div>
+                </label>
+              }
+              <button (click)="openSettings()" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Thay đổi chế độ mặc định">
+                <lucide-icon [img]="Settings" class="w-4.5 h-4.5" aria-hidden="true"></lucide-icon>
+              </button>
+            </div>
           </div>
           <div class="p-6 space-y-5">
             
@@ -462,7 +486,7 @@
       <p class="text-sm text-slate-600">
         <a href="https://pdf-translator.wpsila.com/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
           Hướng dẫn sử dụng
-        </a> • Nguyễn Đức Anh • contact@wpsila.com • v1.0.36 • <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
+        </a> • Nguyễn Đức Anh • contact@wpsila.com • v1.0.37 • <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
           GitHub
         </a>
       </p>

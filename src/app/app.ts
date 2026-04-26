@@ -63,11 +63,13 @@ export class App {
   modeControl = new FormControl<TranslationMode>('zero_svg', { nonNullable: true });
   defaultModeControl = new FormControl<TranslationMode>('zero_svg', { nonNullable: true });
   temperatureControl = new FormControl<number>(0.3, { nonNullable: true });
+  useGoogleSearchControl = new FormControl<boolean>(false, { nonNullable: true });
   showSettingsModal = signal<boolean>(false);
 
   mode = signal<TranslationMode>('zero_svg');
   isTwoPhaseMode = computed(() => this.mode() === 'phase1' || this.mode() === 'phase2');
   temperature = signal<number>(0.3);
+  useGoogleSearch = signal<boolean>(false);
   
   isProcessing = signal<boolean>(false);
   progressMessage = signal<string>('');
@@ -160,6 +162,7 @@ export class App {
       }
     });
     this.temperatureControl.valueChanges.subscribe(val => this.temperature.set(val));
+    this.useGoogleSearchControl.valueChanges.subscribe(val => this.useGoogleSearch.set(val));
 
     // Handle initial mode load
     if (typeof localStorage !== 'undefined') {
@@ -410,7 +413,7 @@ export class App {
           this.loadPrompt('system_instructions_zero_math.md'),
           this.loadPrompt('prompt_zero_math.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp);
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'zero_svg') {
@@ -419,7 +422,7 @@ export class App {
           this.loadPrompt('system_instructions_zero_svg.md'),
           this.loadPrompt('prompt_zero_svg.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp);
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'normal') {
@@ -428,7 +431,7 @@ export class App {
           this.loadPrompt('system_instructions.md'),
           this.loadPrompt('prompt.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp);
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'phase1') {
@@ -437,7 +440,7 @@ export class App {
           this.loadPrompt('system_instructions_phase_1.md'),
           this.loadPrompt('prompt_phase_1.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp);
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, false);
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'phase2') {
@@ -453,7 +456,7 @@ export class App {
         
         // base64 variable contains raw HTML text for phase 2
         const htmlContent = base64;
-        const result = await this.geminiService.translateHtml(htmlContent, prompt, instruction, temp);
+        const result = await this.geminiService.translateHtml(htmlContent, prompt, instruction, temp, this.useGoogleSearch());
         this.resultHtml.set(this.extractHtml(result));
       }
 

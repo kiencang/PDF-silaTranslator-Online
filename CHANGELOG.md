@@ -11,6 +11,11 @@ Ví dụ 1.0.19.i nghĩa là phiên bản này có lõi giống y phiên bản 1
 
 ## [1.0.37.c] - 2026-04-26
 
+### Fixed
+- Chữa bản lỗi v1.0.37.
+
+## [1.0.37] - 2026-04-26
+
 ### Added
 - Thêm tính năng bổ sung công cụ tìm kiếm khi dịch bằng AI (grounding with google search).
 

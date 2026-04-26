@@ -61,7 +61,9 @@ export class App {
   mimeType = signal<string>('');
   
   modeControl = new FormControl<TranslationMode>('zero_svg', { nonNullable: true });
+  defaultModeControl = new FormControl<TranslationMode>('zero_svg', { nonNullable: true });
   temperatureControl = new FormControl<number>(0.3, { nonNullable: true });
+  showSettingsModal = signal<boolean>(false);
 
   mode = signal<TranslationMode>('zero_svg');
   isTwoPhaseMode = computed(() => this.mode() === 'phase1' || this.mode() === 'phase2');
@@ -120,6 +122,27 @@ export class App {
     }
   }
 
+  openSettings() {
+    let savedMode: TranslationMode | null = null;
+    if (typeof localStorage !== 'undefined') {
+      savedMode = localStorage.getItem('sila_pdf_translator_default_mode') as TranslationMode;
+    }
+    this.defaultModeControl.setValue(savedMode || 'zero_svg');
+    this.showSettingsModal.set(true);
+  }
+
+  closeSettings() {
+    this.showSettingsModal.set(false);
+  }
+
+  saveSettings() {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('sila_pdf_translator_default_mode', this.defaultModeControl.value);
+    }
+    this.showSettingsModal.set(false);
+    this.showToast('success', 'Đã lưu chế độ mặc định!');
+  }
+
   constructor() {
     this.destroyRef.onDestroy(() => {
       if (this.timerInterval) clearInterval(this.timerInterval);
@@ -137,6 +160,15 @@ export class App {
       }
     });
     this.temperatureControl.valueChanges.subscribe(val => this.temperature.set(val));
+
+    // Handle initial mode load
+    if (typeof localStorage !== 'undefined') {
+      const savedMode = localStorage.getItem('sila_pdf_translator_default_mode') as TranslationMode;
+      if (savedMode) {
+        this.modeControl.setValue(savedMode);
+        this.mode.set(savedMode);
+      }
+    }
 
     effect(() => {
       if (this.resultHtml()) {

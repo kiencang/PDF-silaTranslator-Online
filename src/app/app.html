@@ -1,24 +1,20 @@
 <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 font-sans">
   <!-- Header -->
   <header class="bg-white border-b border-slate-200 relative z-40" [attr.inert]="showResetConfirm() ? true : null">
-    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3 md:h-16 md:py-0 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0">
       <div class="flex items-center gap-2">
         <div class="bg-indigo-600 text-white p-1.5 rounded-lg">
           <lucide-icon [img]="FileText" class="w-5 h-5" aria-hidden="true"></lucide-icon>
         </div>
         <h1 class="text-2xl font-semibold tracking-tight text-slate-900 flex items-baseline gap-2">
           PDF silaTranslator Online
-          <span class="text-sm font-medium text-slate-400 tracking-normal">v1.0.35</span>
         </h1>
       </div>
       
       <!-- Search Component -->
-      <div class="relative flex items-center gap-4">
-        <div class="flex items-center gap-4 text-xs text-slate-400 hidden md:flex">
-          <span>Powered by Gemini</span>
-        </div>
+      <div class="relative w-full md:w-auto flex items-center">
         
-        <div class="relative w-80 md:w-96 lg:w-[500px]">
+        <div class="relative w-full md:w-96 lg:w-[500px]">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             @if (isSearching()) {
               <lucide-icon [img]="Loader2" class="w-4 h-4 text-indigo-500 animate-spin" aria-hidden="true"></lucide-icon>
@@ -209,9 +205,11 @@
         <section class="bg-white rounded-2xl ring-1 ring-slate-900/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden transition-opacity duration-300"
                  [class.opacity-50]="isProcessing()" 
                  [class.pointer-events-none]="isProcessing()">
-          <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
-            <lucide-icon [img]="Settings" class="w-4 h-4 text-slate-500" aria-hidden="true"></lucide-icon>
+          <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-900 uppercase tracking-wider">2. Cấu hình</h2>
+            <button (click)="openSettings()" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Thay đổi chế độ mặc định">
+              <lucide-icon [img]="Settings" class="w-4.5 h-4.5" aria-hidden="true"></lucide-icon>
+            </button>
           </div>
           <div class="p-6 space-y-5">
             
@@ -464,7 +462,7 @@
       <p class="text-sm text-slate-600">
         <a href="https://pdf-translator.wpsila.com/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
           Hướng dẫn sử dụng
-        </a> • Nguyễn Đức Anh • contact@wpsila.com • <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
+        </a> • Nguyễn Đức Anh • contact@wpsila.com • v1.0.36 • <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
           GitHub
         </a>
       </p>
@@ -515,6 +513,59 @@
           </button>
           <button (click)="confirmReset()" class="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
             Đồng ý
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Settings Modal -->
+  @if (showSettingsModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-0 animate-in zoom-in-95 duration-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+          <h3 id="settings-title" class="text-lg font-semibold text-slate-900">Thay đổi chế độ mặc định</h3>
+          <button (click)="closeSettings()" class="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-md p-1" aria-label="Đóng cài đặt">
+            <lucide-icon [img]="X" class="w-5 h-5" aria-hidden="true"></lucide-icon>
+          </button>
+        </div>
+        <div class="p-6">
+          <p class="text-slate-500 text-sm mb-5">
+            Chế độ được chọn sẽ tự động áp dụng mỗi khi bạn tải lại trang. Cấu hình chỉ lưu tại trình duyệt bạn đang dùng.
+          </p>
+          <div class="space-y-3">
+            <label class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition-colors"
+                   [class.border-indigo-600]="defaultModeControl.value === 'zero_math'"
+                   [class.bg-indigo-50]="defaultModeControl.value === 'zero_math'">
+              <input type="radio" value="zero_math" [formControl]="defaultModeControl" class="text-indigo-600 focus:ring-indigo-600 mt-0.5">
+              <span class="text-sm font-medium text-slate-900">Tài liệu khoa học xã hội</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition-colors"
+                   [class.border-indigo-600]="defaultModeControl.value === 'zero_svg'"
+                   [class.bg-indigo-50]="defaultModeControl.value === 'zero_svg'">
+              <input type="radio" value="zero_svg" [formControl]="defaultModeControl" class="text-indigo-600 focus:ring-indigo-600 mt-0.5">
+              <span class="text-sm font-medium text-slate-900">Tài liệu khoa học nói chung</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition-colors"
+                   [class.border-indigo-600]="defaultModeControl.value === 'normal'"
+                   [class.bg-indigo-50]="defaultModeControl.value === 'normal'">
+              <input type="radio" value="normal" [formControl]="defaultModeControl" class="text-indigo-600 focus:ring-indigo-600 mt-0.5">
+              <span class="text-sm font-medium text-slate-900">Tài liệu toán chuyên ngành</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition-colors"
+                   [class.border-indigo-600]="defaultModeControl.value === 'phase1'"
+                   [class.bg-indigo-50]="defaultModeControl.value === 'phase1'">
+              <input type="radio" value="phase1" [formControl]="defaultModeControl" class="text-indigo-600 focus:ring-indigo-600 mt-0.5">
+              <span class="text-sm font-medium text-slate-900">Dịch 2 giai đoạn</span>
+            </label>
+          </div>
+        </div>
+        <div class="p-5 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+          <button (click)="closeSettings()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400">
+            Hủy
+          </button>
+          <button (click)="saveSettings()" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm shadow-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+            Lưu cài đặt
           </button>
         </div>
       </div>

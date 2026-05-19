@@ -6,11 +6,66 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import {join} from 'node:path';
+import { GoogleGenAI } from '@google/genai';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
+app.use(express.json({ limit: '50mb' }));
+
 const angularApp = new AngularNodeAppEngine();
+
+// Initialize Gemini
+const ai = new GoogleGenAI({
+  apiKey: process.env['GEMINI_API_KEY'] || '',
+  httpOptions: {
+    headers: {
+      'User-Agent': 'aistudio-build',
+    }
+  }
+});
+
+app.post('/api/gemini/countTokens', async (req, res) => {
+  const { fileData, mimeType } = req.body;
+  try {
+    const result = await ai.models.countTokens({
+      model: 'gemini-flash-latest',
+      contents: [
+        {
+          parts: [
+            mimeType === 'text/html' ? { text: fileData } : {
+              inlineData: {
+                data: fileData,
+                mimeType: mimeType
+              }
+            }
+          ]
+        }
+      ]
+    });
+    res.json({ totalTokens: result.totalTokens });
+  } catch (error: unknown) {
+    console.error('Count tokens error:', error);
+    const message = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ error: message });
+  }
+});
+
+app.post('/api/gemini/generate', async (req, res) => {
+  const { model, contents, config } = req.body;
+  try {
+    const response = await ai.models.generateContent({
+      model,
+      contents,
+      config
+    });
+    res.json(response);
+  } catch (error: unknown) {
+    console.error('Generate content error:', error);
+    const message = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ error: message });
+  }
+});
 
 /**
  * Serve static files from /browser

@@ -1,32 +1,31 @@
-import { Injectable } from '@angular/core';
-import { GoogleGenAI, ThinkingLevel, GenerateContentResponse, GenerateContentConfig } from '@google/genai';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+
+interface GeminiCandidate {
+  content?: {
+    parts?: { text?: string }[];
+  };
+  finishReason?: string;
+}
+
+interface GeminiResponse {
+  candidates?: GeminiCandidate[];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class GeminiService {
-  private ai: GoogleGenAI;
-  private readonly MODEL_NAME_PRO = 'gemini-3.1-pro-preview';
+  private http = inject(HttpClient);
+  private readonly MODEL_NAME_PRO = 'gemini-pro-latest';
   private readonly MODEL_NAME_FLASH = 'gemini-flash-latest';
-
-  constructor() {
-    // GEMINI_API_KEY is injected via angular.json define
-    this.ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-  }
 
   async countTokens(fileData: string, mimeType: string): Promise<number> {
     try {
-      const response = await this.ai.models.countTokens({
-        model: this.MODEL_NAME_FLASH,
-        contents: [
-          mimeType === 'text/html' ? fileData : {
-            inlineData: {
-              data: fileData,
-              mimeType: mimeType
-            }
-          }
-        ]
-      });
+      const response = await firstValueFrom(
+        this.http.post<{ totalTokens: number }>('/api/gemini/countTokens', { fileData, mimeType })
+      );
       return response.totalTokens || 0;
     } catch (e: unknown) {
       console.error(e);
@@ -34,7 +33,7 @@ export class GeminiService {
     }
   }
 
-  private checkResponse(response: GenerateContentResponse): string {
+  private checkResponse(response: GeminiResponse): string {
     const candidate = response.candidates?.[0];
     if (candidate?.finishReason) {
       const reason = candidate.finishReason;
@@ -45,11 +44,12 @@ export class GeminiService {
       }
     }
 
-    if (!response.text) {
+    const text = candidate?.content?.parts?.[0]?.text;
+    if (!text) {
       throw new Error('Gemini không trả về kết quả (có thể do lỗi hệ thống hoặc bộ lọc). Vui lòng thử lại.');
     }
 
-    return response.text;
+    return text;
   }
 
   async translate(
@@ -60,30 +60,39 @@ export class GeminiService {
     temperature: number,
     useGoogleSearch = false
   ): Promise<string> {
-    const config: GenerateContentConfig = {
-      systemInstruction: systemInstruction,
+    const config = {
+      systemInstruction: { parts: [{ text: systemInstruction }] },
       temperature: temperature,
-      thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH }
     };
-    if (useGoogleSearch) {
-      config.tools = [{ googleSearch: {} }];
+    
+    const tools = useGoogleSearch ? [{ googleSearch: {} }] : undefined;
+
+    try {
+      const response = await firstValueFrom(
+        this.http.post<GeminiResponse>('/api/gemini/generate', {
+          model: this.MODEL_NAME_PRO,
+          contents: [
+            {
+              parts: [
+                {
+                  inlineData: {
+                    data: fileData,
+                    mimeType: mimeType
+                  }
+                },
+                { text: prompt }
+              ]
+            }
+          ],
+          config: { ...config, tools }
+        })
+      );
+
+      return this.checkResponse(response);
+    } catch (e: any) {
+      const errorMsg = e.error?.error || e.message || 'Lỗi không xác định khi dịch tài liệu';
+      throw new Error(errorMsg);
     }
-
-    const response = await this.ai.models.generateContent({
-      model: this.MODEL_NAME_PRO,
-      contents: [
-        {
-          inlineData: {
-            data: fileData,
-            mimeType: mimeType
-          }
-        },
-        prompt
-      ],
-      config
-    });
-
-    return this.checkResponse(response);
   }
 
   async translateHtml(
@@ -93,25 +102,33 @@ export class GeminiService {
     temperature: number,
     useGoogleSearch = false
   ): Promise<string> {
-    const config: GenerateContentConfig = {
-      systemInstruction: systemInstruction,
+    const config = {
+      systemInstruction: { parts: [{ text: systemInstruction }] },
       temperature: temperature,
-      thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH }
     };
-    if (useGoogleSearch) {
-      config.tools = [{ googleSearch: {} }];
+    const tools = useGoogleSearch ? [{ googleSearch: {} }] : undefined;
+
+    try {
+      const response = await firstValueFrom(
+        this.http.post<GeminiResponse>('/api/gemini/generate', {
+          model: this.MODEL_NAME_PRO,
+          contents: [
+            {
+              parts: [
+                { text: htmlContent },
+                { text: prompt }
+              ]
+            }
+          ],
+          config: { ...config, tools }
+        })
+      );
+
+      return this.checkResponse(response);
+    } catch (e: any) {
+      const errorMsg = e.error?.error || e.message || 'Lỗi khi dịch HTML';
+      throw new Error(errorMsg);
     }
-
-    const response = await this.ai.models.generateContent({
-      model: this.MODEL_NAME_PRO,
-      contents: [
-        htmlContent,
-        prompt
-      ],
-      config
-    });
-
-    return this.checkResponse(response);
   }
 
   async translateSearchQuery(query: string): Promise<string> {
@@ -126,15 +143,25 @@ QUY TẮC BẮT BUỘC TUÂN THỦ:
 
     const prompt = `Provide the single best English search query translation for the following Vietnamese query. Output ONLY the raw English text, nothing else: ${query}`;
 
-    const response = await this.ai.models.generateContent({
-      model: this.MODEL_NAME_FLASH,
-      contents: [prompt],
-      config: {
-        systemInstruction: systemInstruction,
-        temperature: 0.1 // Low temperature for more deterministic output
-      }
-    });
+    try {
+      const response = await firstValueFrom(
+        this.http.post<GeminiResponse>('/api/gemini/generate', {
+          model: this.MODEL_NAME_FLASH,
+          contents: [
+            { parts: [{ text: prompt }] }
+          ],
+          config: {
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            temperature: 0.1
+          }
+        })
+      );
 
-    return (response.text || '').trim();
+      const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+      return (text || '').trim();
+    } catch (e: any) {
+      const errorMsg = e.error?.error || e.message || 'Lỗi khi dịch từ khóa';
+      throw new Error(errorMsg);
+    }
   }
 }

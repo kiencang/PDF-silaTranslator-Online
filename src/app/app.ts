@@ -367,9 +367,10 @@ export class App {
       if (tokens > maxTokens) {
         this.showToast('error', `Lỗi: Nội dung vượt quá giới hạn ${maxTokens.toLocaleString()} tokens (${tokens.toLocaleString()} tokens). Vui lòng cắt bớt trang hoặc giảm dung lượng.`);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Không thể đếm token', e);
-      this.showToast('error', 'Lỗi khi kiểm tra dung lượng tài liệu. Vui lòng thử lại.');
+      const msg = e instanceof Error ? e.message : String(e);
+      this.showToast('error', `Lỗi khi kiểm tra dung lượng tài liệu: ${msg}`);
     } finally {
       this.isCountingTokens.set(false);
     }
@@ -467,21 +468,21 @@ export class App {
         this.showToast('success', 'Quá trình dịch tài liệu hoàn tất!');
       }
       
-    } catch (e: unknown) {
+    } catch (e: any) {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : String(e);
       
       if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
-        this.showToast('error', 'Lỗi: Hệ thống AI đang quá tải hoặc đã hết lượt sử dụng.');
+        this.showToast('error', 'Lỗi: Hệ thống AI đang quá tải hoặc đã hết lượt sử dụng (Quota exceeded).');
       } 
       else if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
-        this.showToast('error', 'Lỗi: Máy chủ AI hiện đang bận. Vui lòng thử lại sau.');
+        this.showToast('error', 'Lỗi: Máy chủ AI hiện đang bận (Overloaded). Vui lòng thử lại sau.');
       }
       else if (errorMessage.toLowerCase().includes('safety') || errorMessage.toLowerCase().includes('blocked')) {
-        this.showToast('error', 'Lỗi: Tài liệu bị từ chối do nghi ngờ vi phạm chính sách an toàn.');
+        this.showToast('error', 'Lỗi: Tài liệu bị từ chối do vi phạm chính sách an toàn của Google.');
       }
       else {
-        this.showToast('error', `Lỗi: ${errorMessage || 'Đã xảy ra lỗi kết nối với AI'}`);
+        this.showToast('error', `Lỗi: ${errorMessage}`);
       }
     } finally {
       this.isProcessing.set(false);

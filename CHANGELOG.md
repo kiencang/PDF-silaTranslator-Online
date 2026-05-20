@@ -12,6 +12,7 @@ Ví dụ 1.0.19.i nghĩa là phiên bản này có lõi giống y phiên bản 1
 ## [1.0.40] - 2026-05-20
 ### Fixed
 - Chỉnh tooltip cho phù hợp hơn, vì tính năng này giờ hay bị hạn chế ở người dùng miễn phí.
+- Chuyển model mặc định sang Flash, vì những hạn chế với model Pro ở người dùng miễn phí.
 
 ## [1.0.39] - 2026-05-20
 ### Fixed

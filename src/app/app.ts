@@ -58,7 +58,7 @@ export class App {
   private promptCache = new Map<string, string>();
 
   // State
-  selectedModel = signal<'gemini-pro-latest' | 'gemini-flash-latest'>('gemini-pro-latest');
+  selectedModel = signal<'gemini-pro-latest' | 'gemini-flash-latest'>('gemini-flash-latest');
   selectedFile = signal<File | null>(null);
   fileBase64 = signal<string | null>(null);
   mimeType = signal<string>('');

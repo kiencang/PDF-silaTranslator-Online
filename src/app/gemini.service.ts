@@ -58,7 +58,8 @@ export class GeminiService {
     prompt: string,
     systemInstruction: string,
     temperature: number,
-    useGoogleSearch = false
+    useGoogleSearch = false,
+    modelName: string = this.MODEL_NAME_PRO
   ): Promise<string> {
     const config = {
       systemInstruction: { parts: [{ text: systemInstruction }] },
@@ -70,7 +71,7 @@ export class GeminiService {
     try {
       const response = await firstValueFrom(
         this.http.post<GeminiResponse>('/api/gemini/generate', {
-          model: this.MODEL_NAME_PRO,
+          model: modelName,
           contents: [
             {
               parts: [
@@ -100,7 +101,8 @@ export class GeminiService {
     prompt: string,
     systemInstruction: string,
     temperature: number,
-    useGoogleSearch = false
+    useGoogleSearch = false,
+    modelName: string = this.MODEL_NAME_PRO
   ): Promise<string> {
     const config = {
       systemInstruction: { parts: [{ text: systemInstruction }] },
@@ -111,7 +113,7 @@ export class GeminiService {
     try {
       const response = await firstValueFrom(
         this.http.post<GeminiResponse>('/api/gemini/generate', {
-          model: this.MODEL_NAME_PRO,
+          model: modelName,
           contents: [
             {
               parts: [

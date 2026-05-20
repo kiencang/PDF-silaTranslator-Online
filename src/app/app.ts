@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, inject, computed, effect, V
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { GeminiService } from './gemini.service';
-import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, ArrowDown, Maximize, Minimize, Clock, RefreshCw, Info, X, Search, ExternalLink, Scissors, FileEdit } from 'lucide-angular';
+import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, ArrowDown, Maximize, Minimize, Clock, RefreshCw, Info, X, Search, ExternalLink, Scissors, FileEdit, User, Zap } from 'lucide-angular';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PDFDocument } from 'pdf-lib';
@@ -48,6 +48,8 @@ export class App {
   readonly ExternalLink = ExternalLink;
   readonly Scissors = Scissors;
   readonly FileEdit = FileEdit;
+  readonly User = User;
+  readonly Zap = Zap;
 
   readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   readonly MAX_FILE_SIZE_HTML = 0.5 * 1024 * 1024; // 500KB
@@ -56,6 +58,7 @@ export class App {
   private promptCache = new Map<string, string>();
 
   // State
+  selectedModel = signal<'gemini-pro-latest' | 'gemini-flash-latest'>('gemini-pro-latest');
   selectedFile = signal<File | null>(null);
   fileBase64 = signal<string | null>(null);
   mimeType = signal<string>('');
@@ -414,7 +417,7 @@ export class App {
           this.loadPrompt('system_instructions_zero_math.md'),
           this.loadPrompt('prompt_zero_math.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch());
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch(), this.selectedModel());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'zero_svg') {
@@ -423,7 +426,7 @@ export class App {
           this.loadPrompt('system_instructions_zero_svg.md'),
           this.loadPrompt('prompt_zero_svg.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch());
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch(), this.selectedModel());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'normal') {
@@ -432,7 +435,7 @@ export class App {
           this.loadPrompt('system_instructions.md'),
           this.loadPrompt('prompt.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch());
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch(), this.selectedModel());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'phase1') {
@@ -441,7 +444,7 @@ export class App {
           this.loadPrompt('system_instructions_phase_1.md'),
           this.loadPrompt('prompt_phase_1.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, false);
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, false, this.selectedModel());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'phase2') {
@@ -457,7 +460,7 @@ export class App {
         
         // base64 variable contains raw HTML text for phase 2
         const htmlContent = base64;
-        const result = await this.geminiService.translateHtml(htmlContent, prompt, instruction, temp, this.useGoogleSearch());
+        const result = await this.geminiService.translateHtml(htmlContent, prompt, instruction, temp, this.useGoogleSearch(), this.selectedModel());
         this.resultHtml.set(this.extractHtml(result));
       }
 

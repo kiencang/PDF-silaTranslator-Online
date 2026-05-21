@@ -12,6 +12,7 @@ Ví dụ 1.0.19.i nghĩa là phiên bản này có lõi giống y phiên bản 1
 ## [1.0.41] - 2026-05-21
 ### Fixed
 - Thiết lập cài đặt khóa API dùng riêng.
+- Loại bỏ temperature.
 
 ## [1.0.40] - 2026-05-20
 ### Fixed

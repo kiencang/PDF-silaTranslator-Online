@@ -9,7 +9,7 @@
             <lucide-icon [img]="FileText" class="w-5 h-5" aria-hidden="true"></lucide-icon>
           </div>
           <h1 class="text-2xl font-semibold tracking-tight text-slate-900 hidden sm:block md:flex md:items-baseline gap-2">
-            PDF silaTranslator Online
+            PDF silaTranslator
           </h1>
         </div>
 
@@ -48,6 +48,18 @@
             </div>
           </button>
         </div>
+
+        <!-- Custom API Key Indicator/Button -->
+        <button 
+          type="button"
+          (click)="openApiKeyModal()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all border shadow-sm select-none"
+          [ngClass]="userApiKey() ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 text-emerald-700 shadow-inner' : 'bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-600'"
+          [title]="userApiKey() ? 'Click chỉnh sửa hoặc xóa API Key riêng của bạn' : 'Click để tự cấu hình API Key cá nhân'"
+        >
+          <lucide-icon [img]="Key" class="w-3.5 h-3.5" [ngClass]="userApiKey() ? 'text-emerald-600' : 'text-slate-400'"></lucide-icon>
+          <span>{{ userApiKey() ? 'Đang dùng key của bạn' : 'Key hệ thống' }}</span>
+        </button>
       </div>
       
       <!-- Search Component -->
@@ -400,19 +412,6 @@
               </fieldset>
             </div>
 
-            <!-- Temperature -->
-            <div class="space-y-2 pt-2">
-              <div class="flex justify-between items-center">
-                <label for="temp-slider" class="block text-sm font-medium text-slate-700">Temperature</label>
-                <span class="text-xs font-mono text-slate-600" aria-hidden="true">{{ temperature() }}</span>
-              </div>
-              <input id="temp-slider" type="range" min="0.1" max="0.5" step="0.1" [formControl]="temperatureControl" class="w-full accent-indigo-600" [attr.aria-valuetext]="'Mức độ sáng tạo: ' + temperature()">
-              <div class="flex justify-between text-xs text-slate-400" aria-hidden="true">
-                <span>Chặt chẽ</span>
-                <span>Sáng tạo</span>
-              </div>
-            </div>
-
             <!-- Action Button -->
             <button 
               (click)="processFile()"
@@ -525,7 +524,7 @@
       <p class="text-sm text-slate-600">
         <a href="https://pdf-translator.wpsila.com/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
           Hướng dẫn sử dụng
-        </a> • Nguyễn Đức Anh • contact@wpsila.com • v1.0.40 • <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
+        </a> • Nguyễn Đức Anh • contact@wpsila.com • v1.0.41 • <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
           GitHub
         </a>
       </p>
@@ -630,6 +629,86 @@
           <button (click)="saveSettings()" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm shadow-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
             Lưu cài đặt
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Gemini API Key Configuration Modal -->
+  @if (showApiKeyModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" role="dialog" aria-modal="true" aria-labelledby="api-key-title">
+      <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-0 animate-in zoom-in-95 duration-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <lucide-icon [img]="Key" class="w-5 h-5 text-slate-800" aria-hidden="true"></lucide-icon>
+            <h3 id="api-key-title" class="text-lg font-bold text-slate-900">Cấu hình Gemini API Key</h3>
+          </div>
+          <button (click)="closeApiKeyModal()" class="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-md p-1" aria-label="Đóng cấu hình">
+            <lucide-icon [img]="X" class="w-5 h-5" aria-hidden="true"></lucide-icon>
+          </button>
+        </div>
+        <div class="p-6">
+          <p class="text-slate-500 text-sm mb-4 leading-relaxed">
+            Tự cấu hình và sử dụng khóa API (Gemini API Key) riêng để quá trình dịch tài liệu được ổn định nhất, không lo hết lượt dịch giới hạn từ hệ thống chung.
+          </p>
+
+          <div class="flex items-center gap-2 text-sm mt-3 bg-slate-50/50 px-3 py-2 rounded-xl border border-slate-100">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+                  [ngClass]="userApiKey() ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200'">
+              {{ userApiKey() ? 'Đang dùng API Key của bạn' : 'Đang dùng key hệ thống' }}
+            </span>
+            <span class="text-slate-300">|</span>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-medium transition-colors">
+              <lucide-icon [img]="ExternalLink" class="w-3.5 h-3.5" aria-hidden="true"></lucide-icon>
+              <span>Hướng dẫn lấy Key nhanh</span>
+            </a>
+          </div>
+
+          <div class="mt-5">
+            <label for="gemini-custom-api-key" class="text-xs uppercase text-slate-500 font-bold tracking-wider block mb-2">GEMINI API KEY CÁ NHÂN</label>
+            <div class="relative">
+              <input 
+                id="gemini-custom-api-key"
+                [type]="showKeyPlain() ? 'text' : 'password'"
+                [(ngModel)]="tempApiKey"
+                class="block w-full pl-3 pr-10 py-2.5 border border-slate-300 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-mono tracking-wide"
+                placeholder="Nhập AIzaSy..."
+              >
+              <button 
+                type="button"
+                (click)="toggleShowKeyPlain()"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
+                aria-label="Hiện/Ẩn API Key"
+              >
+                <lucide-icon [img]="showKeyPlain() ? EyeOff : Eye" class="w-4 h-4"></lucide-icon>
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-2.5 italic leading-relaxed">
+              Khóa API của bạn được lưu <strong class="text-slate-700 font-semibold">cục bộ tuyệt đối</strong> trong trình duyệt của bạn (<code class="font-mono text-[10px] bg-slate-100 px-1 py-0.5 rounded text-indigo-600">LocalStorage</code>), không lưu trữ trên bất kỳ máy chủ nào khác.
+            </p>
+          </div>
+        </div>
+        <div class="p-5 border-t border-slate-100 bg-slate-50/50 flex justify-between gap-3">
+          <div>
+            @if (userApiKey()) {
+              <button 
+                type="button" 
+                (click)="clearApiKey()" 
+                class="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <lucide-icon [img]="Trash2" class="w-4 h-4" aria-hidden="true"></lucide-icon>
+                <span>Xóa Key cá nhân</span>
+              </button>
+            }
+          </div>
+          <div class="flex gap-3">
+            <button (click)="closeApiKeyModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400">
+              Hủy
+            </button>
+            <button (click)="saveApiKey()" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm shadow-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+              Lưu cấu hình
+            </button>
+          </div>
         </div>
       </div>
     </div>

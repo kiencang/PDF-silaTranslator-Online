@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, inject, computed, effect, V
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { GeminiService } from './gemini.service';
-import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, ArrowDown, Maximize, Minimize, Clock, RefreshCw, Info, X, Search, ExternalLink, Scissors, FileEdit, User, Zap } from 'lucide-angular';
+import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, ArrowDown, Maximize, Minimize, Clock, RefreshCw, Info, X, Search, ExternalLink, Scissors, FileEdit, User, Zap, Key, Eye, EyeOff, Trash2 } from 'lucide-angular';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { PDFDocument } from 'pdf-lib';
@@ -50,6 +50,10 @@ export class App {
   readonly FileEdit = FileEdit;
   readonly User = User;
   readonly Zap = Zap;
+  readonly Key = Key;
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
+  readonly Trash2 = Trash2;
 
   readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   readonly MAX_FILE_SIZE_HTML = 0.5 * 1024 * 1024; // 500KB
@@ -65,13 +69,17 @@ export class App {
   
   modeControl = new FormControl<TranslationMode>('zero_svg', { nonNullable: true });
   defaultModeControl = new FormControl<TranslationMode>('zero_svg', { nonNullable: true });
-  temperatureControl = new FormControl<number>(0.3, { nonNullable: true });
   useGoogleSearchControl = new FormControl<boolean>(false, { nonNullable: true });
   showSettingsModal = signal<boolean>(false);
 
+  // Custom API Key state
+  userApiKey = signal<string>('');
+  showApiKeyModal = signal<boolean>(false);
+  tempApiKey = signal<string>('');
+  showKeyPlain = signal<boolean>(false);
+
   mode = signal<TranslationMode>('zero_svg');
   isTwoPhaseMode = computed(() => this.mode() === 'phase1' || this.mode() === 'phase2');
-  temperature = signal<number>(0.3);
   useGoogleSearch = signal<boolean>(false);
   
   isProcessing = signal<boolean>(false);
@@ -148,6 +156,49 @@ export class App {
     this.showToast('success', 'Đã lưu chế độ mặc định!');
   }
 
+  openApiKeyModal() {
+    if (typeof localStorage !== 'undefined') {
+      const savedKey = localStorage.getItem('sila_pdf_translator_user_api_key') || '';
+      this.tempApiKey.set(savedKey);
+    } else {
+      this.tempApiKey.set('');
+    }
+    this.showKeyPlain.set(false);
+    this.showApiKeyModal.set(true);
+  }
+
+  closeApiKeyModal() {
+    this.showApiKeyModal.set(false);
+  }
+
+  saveApiKey() {
+    const keyVal = this.tempApiKey().trim();
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('sila_pdf_translator_user_api_key', keyVal);
+    }
+    this.userApiKey.set(keyVal);
+    this.showApiKeyModal.set(false);
+    if (keyVal) {
+      this.showToast('success', 'Đã lưu cấu hình API Key cá nhân của bạn!');
+    } else {
+      this.showToast('info', 'Đã xóa cấu hình API Key cá nhân. Hệ thống quay lại sử dụng Key mặc định.');
+    }
+  }
+
+  clearApiKey() {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('sila_pdf_translator_user_api_key');
+    }
+    this.userApiKey.set('');
+    this.tempApiKey.set('');
+    this.showApiKeyModal.set(false);
+    this.showToast('info', 'Đã xóa cấu hình API Key cá nhân. Hệ thống quay lại sử dụng Key mặc định.');
+  }
+
+  toggleShowKeyPlain() {
+    this.showKeyPlain.update(v => !v);
+  }
+
   constructor() {
     this.destroyRef.onDestroy(() => {
       if (this.timerInterval) clearInterval(this.timerInterval);
@@ -157,14 +208,7 @@ export class App {
 
     this.modeControl.valueChanges.subscribe(val => {
       this.mode.set(val);
-      // Ép Temperature về mặc định khi đổi chế độ
-      if (val === 'phase2') {
-        this.temperatureControl.setValue(0.5);
-      } else {
-        this.temperatureControl.setValue(0.3);
-      }
     });
-    this.temperatureControl.valueChanges.subscribe(val => this.temperature.set(val));
     this.useGoogleSearchControl.valueChanges.subscribe(val => this.useGoogleSearch.set(val));
 
     // Handle initial mode load
@@ -173,6 +217,12 @@ export class App {
       if (savedMode) {
         this.modeControl.setValue(savedMode);
         this.mode.set(savedMode);
+      }
+
+      // Load saved user API Key
+      const savedKey = localStorage.getItem('sila_pdf_translator_user_api_key');
+      if (savedKey) {
+        this.userApiKey.set(savedKey);
       }
     }
 
@@ -370,7 +420,7 @@ export class App {
       if (tokens > maxTokens) {
         this.showToast('error', `Lỗi: Nội dung vượt quá giới hạn ${maxTokens.toLocaleString()} tokens (${tokens.toLocaleString()} tokens). Vui lòng cắt bớt trang hoặc giảm dung lượng.`);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Không thể đếm token', e);
       const msg = e instanceof Error ? e.message : String(e);
       this.showToast('error', `Lỗi khi kiểm tra dung lượng tài liệu: ${msg}`);
@@ -408,7 +458,6 @@ export class App {
     try {
       const base64 = this.fileBase64()!;
       const mime = this.mimeType();
-      const temp = this.temperature();
       const currentMode = this.mode();
 
       if (currentMode === 'zero_math') {
@@ -417,7 +466,7 @@ export class App {
           this.loadPrompt('system_instructions_zero_math.md'),
           this.loadPrompt('prompt_zero_math.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch(), this.selectedModel());
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'zero_svg') {
@@ -426,7 +475,7 @@ export class App {
           this.loadPrompt('system_instructions_zero_svg.md'),
           this.loadPrompt('prompt_zero_svg.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch(), this.selectedModel());
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'normal') {
@@ -435,7 +484,7 @@ export class App {
           this.loadPrompt('system_instructions.md'),
           this.loadPrompt('prompt.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, this.useGoogleSearch(), this.selectedModel());
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'phase1') {
@@ -444,7 +493,7 @@ export class App {
           this.loadPrompt('system_instructions_phase_1.md'),
           this.loadPrompt('prompt_phase_1.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, temp, false, this.selectedModel());
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, false, this.selectedModel());
         this.resultHtml.set(this.extractHtml(result));
       }
       else if (currentMode === 'phase2') {
@@ -460,7 +509,7 @@ export class App {
         
         // base64 variable contains raw HTML text for phase 2
         const htmlContent = base64;
-        const result = await this.geminiService.translateHtml(htmlContent, prompt, instruction, temp, this.useGoogleSearch(), this.selectedModel());
+        const result = await this.geminiService.translateHtml(htmlContent, prompt, instruction, this.useGoogleSearch(), this.selectedModel());
         this.resultHtml.set(this.extractHtml(result));
       }
 
@@ -471,7 +520,7 @@ export class App {
         this.showToast('success', 'Quá trình dịch tài liệu hoàn tất!');
       }
       
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : String(e);
       

@@ -25,10 +25,27 @@ const ai = new GoogleGenAI({
   }
 });
 
+// Helper to get Gemini client based on user API key header
+function getAiInstance(req: express.Request): GoogleGenAI {
+  const userApiKey = req.headers['x-gemini-api-key'];
+  if (userApiKey && typeof userApiKey === 'string' && userApiKey.trim() !== '') {
+    return new GoogleGenAI({
+      apiKey: userApiKey.trim(),
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build-custom',
+        }
+      }
+    });
+  }
+  return ai;
+}
+
 app.post('/api/gemini/countTokens', async (req, res) => {
   const { fileData, mimeType } = req.body;
   try {
-    const result = await ai.models.countTokens({
+    const activeAi = getAiInstance(req);
+    const result = await activeAi.models.countTokens({
       model: 'gemini-flash-latest',
       contents: [
         {
@@ -54,7 +71,8 @@ app.post('/api/gemini/countTokens', async (req, res) => {
 app.post('/api/gemini/generate', async (req, res) => {
   const { model, contents, config } = req.body;
   try {
-    const response = await ai.models.generateContent({
+    const activeAi = getAiInstance(req);
+    const response = await activeAi.models.generateContent({
       model,
       contents,
       config
@@ -96,11 +114,7 @@ app.use((req, res, next) => {
  */
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
   const port = 3000;
-  app.listen(port, (error) => {
-    if (error) {
-      throw error;
-    }
-
+  app.listen(port, () => {
     console.log(`Node Express server listening on http://localhost:${port}`);
   });
 }

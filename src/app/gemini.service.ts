@@ -21,10 +21,21 @@ export class GeminiService {
   private readonly MODEL_NAME_PRO = 'gemini-pro-latest';
   private readonly MODEL_NAME_FLASH = 'gemini-flash-latest';
 
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {};
+    if (typeof localStorage !== 'undefined') {
+      const userKey = localStorage.getItem('sila_pdf_translator_user_api_key');
+      if (userKey && userKey.trim() !== '') {
+        headers['x-gemini-api-key'] = userKey.trim();
+      }
+    }
+    return headers;
+  }
+
   async countTokens(fileData: string, mimeType: string): Promise<number> {
     try {
       const response = await firstValueFrom(
-        this.http.post<{ totalTokens: number }>('/api/gemini/countTokens', { fileData, mimeType })
+        this.http.post<{ totalTokens: number }>('/api/gemini/countTokens', { fileData, mimeType }, { headers: this.getHeaders() })
       );
       return response.totalTokens || 0;
     } catch (e: unknown) {
@@ -57,13 +68,12 @@ export class GeminiService {
     mimeType: string,
     prompt: string,
     systemInstruction: string,
-    temperature: number,
     useGoogleSearch = false,
     modelName: string = this.MODEL_NAME_PRO
   ): Promise<string> {
     const config = {
       systemInstruction: { parts: [{ text: systemInstruction }] },
-      temperature: temperature,
+      thinkingConfig: { thinkingLevel: 'HIGH' }
     };
     
     const tools = useGoogleSearch ? [{ googleSearch: {} }] : undefined;
@@ -86,12 +96,13 @@ export class GeminiService {
             }
           ],
           config: { ...config, tools }
-        })
+        }, { headers: this.getHeaders() })
       );
 
       return this.checkResponse(response);
-    } catch (e: any) {
-      const errorMsg = e.error?.error || e.message || 'Lỗi không xác định khi dịch tài liệu';
+    } catch (e: unknown) {
+      const err = e as { error?: { error?: string }; message?: string };
+      const errorMsg = err.error?.error || err.message || 'Lỗi không xác định khi dịch tài liệu';
       throw new Error(errorMsg);
     }
   }
@@ -100,13 +111,12 @@ export class GeminiService {
     htmlContent: string,
     prompt: string,
     systemInstruction: string,
-    temperature: number,
     useGoogleSearch = false,
     modelName: string = this.MODEL_NAME_PRO
   ): Promise<string> {
     const config = {
       systemInstruction: { parts: [{ text: systemInstruction }] },
-      temperature: temperature,
+      thinkingConfig: { thinkingLevel: 'HIGH' }
     };
     const tools = useGoogleSearch ? [{ googleSearch: {} }] : undefined;
 
@@ -123,12 +133,13 @@ export class GeminiService {
             }
           ],
           config: { ...config, tools }
-        })
+        }, { headers: this.getHeaders() })
       );
 
       return this.checkResponse(response);
-    } catch (e: any) {
-      const errorMsg = e.error?.error || e.message || 'Lỗi khi dịch HTML';
+    } catch (e: unknown) {
+      const err = e as { error?: { error?: string }; message?: string };
+      const errorMsg = err.error?.error || err.message || 'Lỗi khi dịch HTML';
       throw new Error(errorMsg);
     }
   }
@@ -153,16 +164,16 @@ QUY TẮC BẮT BUỘC TUÂN THỦ:
             { parts: [{ text: prompt }] }
           ],
           config: {
-            systemInstruction: { parts: [{ text: systemInstruction }] },
-            temperature: 0.1
+            systemInstruction: { parts: [{ text: systemInstruction }] }
           }
-        })
+        }, { headers: this.getHeaders() })
       );
 
       const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
       return (text || '').trim();
-    } catch (e: any) {
-      const errorMsg = e.error?.error || e.message || 'Lỗi khi dịch từ khóa';
+    } catch (e: unknown) {
+      const err = e as { error?: { error?: string }; message?: string };
+      const errorMsg = err.error?.error || err.message || 'Lỗi khi dịch từ khóa';
       throw new Error(errorMsg);
     }
   }

@@ -157,6 +157,7 @@ export class App {
   }
 
   openApiKeyModal() {
+    if (this.isProcessing()) return;
     if (typeof localStorage !== 'undefined') {
       const savedKey = localStorage.getItem('sila_pdf_translator_user_api_key') || '';
       this.tempApiKey.set(savedKey);
@@ -525,7 +526,11 @@ export class App {
       const errorMessage = e instanceof Error ? e.message : String(e);
       
       if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
-        this.showToast('error', 'Lỗi: Hệ thống AI đang quá tải hoặc đã hết lượt sử dụng (Quota exceeded).');
+        if (!this.userApiKey()) {
+          this.showToast('error', 'Lỗi: Hệ thống AI đang quá tải hoặc đã hết lượt sử dụng (Quota exceeded). Bạn có thể nhập Key của riêng bạn để dùng tiếp.');
+        } else {
+          this.showToast('error', 'Lỗi: Hệ thống AI đang quá tải hoặc đã hết lượt sử dụng (Quota exceeded).');
+        }
       } 
       else if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
         this.showToast('error', 'Lỗi: Máy chủ AI hiện đang bận (Overloaded). Vui lòng thử lại sau.');

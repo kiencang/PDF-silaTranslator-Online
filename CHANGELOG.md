@@ -13,6 +13,7 @@ Ví dụ 1.0.19.i nghĩa là phiên bản này có lõi giống y phiên bản 1
 ### Fixed
 - Điều chỉnh một chút về giao diện.
 - Cập nhật một số Toast cho phù hợp hơn.
+- Chuyển model tính toán, đếm token thành `gemini-flash-lite-latest`.
 
 ## [1.0.43] - 2026-05-23
 ### Fixed

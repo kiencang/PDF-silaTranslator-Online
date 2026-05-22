@@ -2,23 +2,27 @@ import { Component, ChangeDetectionStrategy, signal, inject, computed, effect, V
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { GeminiService } from './gemini.service';
+import { ToastService } from './toast.service';
+import { PdfService } from './pdf.service';
 import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, ArrowDown, Maximize, Minimize, Clock, RefreshCw, Info, X, Search, ExternalLink, Scissors, FileEdit, User, Zap, Key, Eye, EyeOff, Trash2 } from 'lucide-angular';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { PDFDocument } from 'pdf-lib';
+import { SettingsModalComponent } from './settings-modal.component';
+import { ApiKeyModalComponent } from './api-key-modal.component';
+import { ToastsComponent } from './toasts.component';
+import { ResetConfirmModalComponent } from './reset-confirm-modal.component';
+import { HeaderControlsComponent } from './header-controls.component';
+import { UploadZoneComponent } from './upload-zone.component';
 
-type TranslationMode = 'zero_math' | 'zero_svg' | 'normal' | 'phase1' | 'phase2';
+import { ConfigSectionComponent } from './config-section.component';
+import { ResultSectionComponent } from './result-section.component';
 
-interface Toast {
-  id: number;
-  type: 'error' | 'info' | 'success';
-  message: string;
-}
+export type TranslationMode = 'zero_math' | 'zero_svg' | 'normal' | 'phase1' | 'phase2';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, SettingsModalComponent, ApiKeyModalComponent, ToastsComponent, ResetConfirmModalComponent, HeaderControlsComponent, UploadZoneComponent, ConfigSectionComponent, ResultSectionComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +31,8 @@ export class App {
   private geminiService = inject(GeminiService);
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
+  private toastService = inject(ToastService);
+  private pdfService = inject(PdfService);
 
   // Icons
   readonly UploadCloud = UploadCloud;
@@ -87,7 +93,6 @@ export class App {
   error = signal<string | null>(null);
   
   resultHtml = signal<string | null>(null);
-  isDragging = signal<boolean>(false);
   tokenCount = signal<number>(0);
   isCountingTokens = signal<boolean>(false);
   
@@ -102,18 +107,9 @@ export class App {
   elapsedTime = signal<number>(0);
   private timerInterval: ReturnType<typeof setInterval> | undefined;
   
-  toasts = signal<Toast[]>([]);
-  private toastIdCounter = 0;
-  private toastTimeouts = new Set<ReturnType<typeof setTimeout>>();
   showResetConfirm = signal<boolean>(false);
-  // Search State
-  isSearching = signal<boolean>(false);
-  translatedQuery = signal<string>('');
-  searchQuery = signal<string>('');
 
-  @ViewChild('cancelResetBtn') cancelResetBtn?: ElementRef<HTMLButtonElement>;
   @ViewChild('resetBtn') resetBtn?: ElementRef<HTMLButtonElement>;
-  @ViewChild('previewIframe') previewIframe?: ElementRef<HTMLIFrameElement>;
 
   // Computed
   isPdfUploaded = computed(() => this.mimeType() === 'application/pdf');
@@ -204,7 +200,7 @@ export class App {
     this.destroyRef.onDestroy(() => {
       if (this.timerInterval) clearInterval(this.timerInterval);
       if (this.cropTimeout) clearTimeout(this.cropTimeout);
-      this.toastTimeouts.forEach(t => clearTimeout(t));
+      this.toastService.clearAll();
     });
 
     this.modeControl.valueChanges.subscribe(val => {
@@ -226,75 +222,22 @@ export class App {
         this.userApiKey.set(savedKey);
       }
     }
-
-    effect(() => {
-      if (this.resultHtml()) {
-        setTimeout(() => this.updateIframe(), 50);
-      }
-    });
   }
 
   showToast(type: 'error' | 'info' | 'success', message: string) {
-    const id = this.toastIdCounter++;
-    this.toasts.update(t => [...t, { id, type, message }]);
-    const timeoutId = setTimeout(() => {
-      this.removeToast(id);
-      this.toastTimeouts.delete(timeoutId);
-    }, 5000);
-    this.toastTimeouts.add(timeoutId);
+    this.toastService.show(type, message);
   }
 
-  removeToast(id: number) {
-    this.toasts.update(t => t.filter(toast => toast.id !== id));
-  }
-
-  onDragOver(event: DragEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragging.set(true);
-  }
-
-  onDragLeave(event: DragEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragging.set(false);
-  }
-
-  onDropOverride(event: DragEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isDragging.set(false);
-
-    if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-      const file = event.dataTransfer.files[0];
-      if (file.type === 'application/pdf') {
-         this.handleFile(file);
-      } else if (file.type === 'text/html' || file.name.endsWith('.html')) {
-         this.handleHtmlFile(file);
-         this.modeControl.setValue('phase2');
-         this.showToast('info', 'Đã tự động chuyển sang Phase 2 do phát hiện file HTML.');
-      } else {
-         this.showToast('error', 'Vui lòng tải lên tệp PDF hoặc HTML.');
-      }
+  onFileSelected(file: File) {
+    if (file.type === 'application/pdf') {
+       this.handleFile(file);
+    } else if (file.type === 'text/html' || file.name.endsWith('.html')) {
+       this.handleHtmlFile(file);
+       this.modeControl.setValue('phase2');
+       this.showToast('info', 'Đã tự động chuyển sang Phase 2 do phát hiện file HTML.');
+    } else {
+       this.showToast('error', 'Vui lòng tải lên tệp PDF hoặc HTML.');
     }
-  }
-
-  onFileSelectedOverride(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      if (file.type === 'application/pdf') {
-         this.handleFile(file);
-      } else if (file.type === 'text/html' || file.name.endsWith('.html')) {
-         this.handleHtmlFile(file);
-         this.modeControl.setValue('phase2');
-         this.showToast('info', 'Đã tự động chuyển sang Phase 2 do phát hiện file HTML.');
-      } else {
-         this.showToast('error', 'Vui lòng tải lên tệp PDF hoặc HTML.');
-      }
-    }
-    // Reset giá trị của input để cho phép chọn lại cùng một file
-    input.value = '';
   }
 
   private async handleFile(file: File) {
@@ -321,9 +264,7 @@ export class App {
     this.isCountingTokens.set(true);
 
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
-      const pages = pdfDoc.getPageCount();
+      const pages = await this.pdfService.getPageCount(file);
       this.pdfTotalPages.set(pages);
       this.pdfStartPage.set(1);
       this.pdfEndPage.set(pages);
@@ -357,31 +298,10 @@ export class App {
         return;
       }
 
-      const arrayBuffer = await file.arrayBuffer();
-      const originalPdf = await PDFDocument.load(arrayBuffer);
-      const newPdf = await PDFDocument.create();
-
-      const pageIndices = [];
-      for (let i = start - 1; i < end; i++) {
-        pageIndices.push(i);
-      }
-
-      const copiedPages = await newPdf.copyPages(originalPdf, pageIndices);
-      copiedPages.forEach(page => newPdf.addPage(page));
-
-      const pdfBytes = await newPdf.save();
-      const croppedBlob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
-      const croppedFileObj = new File([croppedBlob], file.name, { type: 'application/pdf' });
-
-      this.croppedFile.set(croppedFileObj);
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = (reader.result as string).split(',')[1];
-        this.fileBase64.set(base64String);
-        this.checkTokenLimit(base64String, file.type);
-      };
-      reader.readAsDataURL(croppedFileObj);
+      const result = await this.pdfService.cropPdf(file, start, end, this.pdfTotalPages());
+      this.croppedFile.set(result.croppedFile);
+      this.fileBase64.set(result.fileBase64);
+      this.checkTokenLimit(result.fileBase64, file.type);
 
     } catch (error) {
       console.error('Error cropping PDF:', error);
@@ -557,18 +477,9 @@ export class App {
     return text;
   }
 
-  private updateIframe() {
-    if (this.previewIframe?.nativeElement && this.resultHtml()) {
-      this.previewIframe.nativeElement.srcdoc = this.resultHtml()!;
-    }
-  }
-
   resetApp() {
     if (this.resultHtml()) {
       this.showResetConfirm.set(true);
-      setTimeout(() => {
-        this.cancelResetBtn?.nativeElement?.focus();
-      }, 50);
     } else {
       this.confirmReset();
     }
@@ -618,28 +529,5 @@ export class App {
       URL.revokeObjectURL(url);
       this.showToast('success', 'Đã tải file HTML xuống máy.');
     }
-  }
-
-  async onSearch(query: string) {
-    if (!query.trim() || this.isSearching()) return;
-
-    this.searchQuery.set(query);
-    this.isSearching.set(true);
-    this.translatedQuery.set('');
-
-    try {
-      const result = await this.geminiService.translateSearchQuery(query);
-      this.translatedQuery.set(result);
-    } catch (e: unknown) {
-      console.error('Lỗi khi dịch từ khóa tìm kiếm', e);
-      this.showToast('error', 'Lỗi khi dịch từ khóa. Vui lòng thử lại.');
-    } finally {
-      this.isSearching.set(false);
-    }
-  }
-
-  closeSearch() {
-    this.translatedQuery.set('');
-    this.searchQuery.set('');
   }
 }

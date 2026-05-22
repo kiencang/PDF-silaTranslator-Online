@@ -145,7 +145,7 @@ export class GeminiService {
   }
 
   async translateSearchQuery(query: string): Promise<string> {
-    const systemInstruction = `Bạn là một AI chuyên dịch truy vấn tìm kiếm (search queries) từ tiếng Việt sang tiếng Anh. Nhiệm vụ DUY NHẤT của bạn là trả về MỘT (1) truy vấn tìm kiếm tiếng Anh hiệu quả nhất, dựa trên đánh giá của bạn về ý định (search intent) và cách tìm kiếm phổ biến nhất trong tiếng Anh.
+    const systemInstruction = `Bạn là một AI chuyên dịch truy vấn tìm kiếm (search queries) từ tiếng Việt sang Tiếng Anh. Nhiệm vụ DUY NHẤT của bạn là trả về MỘT (1) truy vấn tìm kiếm tiếng Anh hiệu quả nhất, dựa trên đánh giá của bạn về ý định (search intent) và cách tìm kiếm phổ biến nhất trong tiếng Anh.
 
 QUY TẮC BẮT BUỘC TUÂN THỦ:
 1.  **CHỈ MỘT KẾT QUẢ:** Luôn luôn và chỉ luôn trả về DUY NHẤT MỘT chuỗi văn bản là bản dịch truy vấn tốt nhất. KHÔNG được đưa ra nhiều lựa chọn.
@@ -172,8 +172,20 @@ QUY TẮC BẮT BUỘC TUÂN THỦ:
       const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
       return (text || '').trim();
     } catch (e: unknown) {
-      const err = e as { error?: { error?: string }; message?: string };
-      const errorMsg = err.error?.error || err.message || 'Lỗi khi dịch từ khóa';
+      const err = e as { error?: { error?: { message?: string } | string }; message?: string };
+      
+      // Lấy chi tiết lỗi từ backend nếu có
+      let errorMsg = 'Lỗi khi dịch từ khóa';
+      if (err.error?.error) {
+         if (typeof err.error.error === 'string') {
+            errorMsg = err.error.error;
+         } else if (err.error.error.message) {
+            errorMsg = err.error.error.message;
+         }
+      } else if (err.message) {
+         errorMsg = err.message;
+      }
+      
       throw new Error(errorMsg);
     }
   }

@@ -12,6 +12,7 @@ Ví dụ 1.0.19.i nghĩa là phiên bản này có lõi giống y phiên bản 1
 ## [1.0.46] - 2026-05-23
 ### Fixed
 - Bổ sung thông báo Toast của phần Dịch từ khóa cẩn thận hơn.
+- Điều chỉnh thời gian hiển thị các Toast lỗi lên 10s.
 
 ## [1.0.45] - 2026-05-23
 ### Fixed

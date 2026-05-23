@@ -14,14 +14,15 @@ export class ToastService {
   private toastIdCounter = 0;
   private toastTimeouts = new Set<ReturnType<typeof setTimeout>>();
 
-  show(type: 'error' | 'info' | 'success', message: string, duration = 5000) {
+  show(type: 'error' | 'info' | 'success', message: string, duration?: number) {
+    const finalDuration = duration !== undefined ? duration : (type === 'error' ? 10000 : 5000);
     const id = this.toastIdCounter++;
     this.toasts.update(t => [...t, { id, type, message }]);
     
     const timeoutId = setTimeout(() => {
       this.remove(id);
       this.toastTimeouts.delete(timeoutId);
-    }, duration);
+    }, finalDuration);
     
     this.toastTimeouts.add(timeoutId);
   }

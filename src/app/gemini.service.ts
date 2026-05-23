@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 interface GeminiCandidate {
@@ -30,6 +30,28 @@ export class GeminiService {
       }
     }
     return headers;
+  }
+
+  private handleError(e: unknown, defaultMsg: string): never {
+    if (e instanceof HttpErrorResponse) {
+      // Khi server trả về trang HTML (VD 502 Bad Gateway) hoặc lỗi quá tải, HttpClient parse JSON thất bại
+      if (e.message && e.message.includes('JSON.parse: unexpected character')) {
+        throw new Error(`Server bị quá tải hoặc phản hồi không hợp lệ (${e.status}). Vui lòng thử lại sau.`);
+      } else if (e.error?.error) {
+         let errorMsg = defaultMsg;
+         if (typeof e.error.error === 'string') {
+            errorMsg = e.error.error;
+         } else if (e.error.error.message) {
+            errorMsg = e.error.error.message;
+         }
+         throw new Error(errorMsg);
+      } else if (e.message) {
+         throw new Error(e.message);
+      }
+    } else if (e instanceof Error) {
+      throw new Error(e.message);
+    }
+    throw new Error(defaultMsg);
   }
 
   async countTokens(fileData: string, mimeType: string): Promise<number> {
@@ -101,9 +123,7 @@ export class GeminiService {
 
       return this.checkResponse(response);
     } catch (e: unknown) {
-      const err = e as { error?: { error?: string }; message?: string };
-      const errorMsg = err.error?.error || err.message || 'Lỗi không xác định khi dịch tài liệu';
-      throw new Error(errorMsg);
+      this.handleError(e, 'Lỗi không xác định khi dịch tài liệu');
     }
   }
 
@@ -138,9 +158,7 @@ export class GeminiService {
 
       return this.checkResponse(response);
     } catch (e: unknown) {
-      const err = e as { error?: { error?: string }; message?: string };
-      const errorMsg = err.error?.error || err.message || 'Lỗi khi dịch HTML';
-      throw new Error(errorMsg);
+      this.handleError(e, 'Lỗi khi dịch HTML');
     }
   }
 
@@ -172,21 +190,7 @@ QUY TẮC BẮT BUỘC TUÂN THỦ:
       const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
       return (text || '').trim();
     } catch (e: unknown) {
-      const err = e as { error?: { error?: { message?: string } | string }; message?: string };
-      
-      // Lấy chi tiết lỗi từ backend nếu có
-      let errorMsg = 'Lỗi khi dịch từ khóa';
-      if (err.error?.error) {
-         if (typeof err.error.error === 'string') {
-            errorMsg = err.error.error;
-         } else if (err.error.error.message) {
-            errorMsg = err.error.error.message;
-         }
-      } else if (err.message) {
-         errorMsg = err.message;
-      }
-      
-      throw new Error(errorMsg);
+      this.handleError(e, 'Lỗi khi dịch từ khóa');
     }
   }
 }

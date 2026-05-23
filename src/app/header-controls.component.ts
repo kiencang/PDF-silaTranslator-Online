@@ -71,16 +71,20 @@ import { SearchBarComponent } from './search-bar.component';
             type="button"
             [disabled]="isProcessing"
             (click)="onOpenApiKeyModal()"
-            class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all border shadow-sm select-none"
+            class="group relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all border shadow-sm select-none"
             [class.cursor-not-allowed]="isProcessing"
             [class.cursor-pointer]="!isProcessing"
             [ngClass]="hasUserApiKey 
               ? (isProcessing ? 'bg-emerald-50/50 border-emerald-100 text-emerald-600/80' : 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 text-emerald-700 shadow-inner') 
               : (isProcessing ? 'bg-slate-50/50 border-slate-100 text-slate-400' : 'bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-600')"
-            [title]="isProcessing ? 'Không thể cấu hình API Key khi đang dịch' : (hasUserApiKey ? 'Click chỉnh sửa hoặc xóa API Key riêng của bạn' : 'Click để tự cấu hình API Key cá nhân')"
           >
             <lucide-icon [img]="Key" class="w-3.5 h-3.5" [ngClass]="hasUserApiKey ? 'text-emerald-600' : 'text-slate-400'"></lucide-icon>
             <span>{{ hasUserApiKey ? 'Đang dùng key của bạn' : 'Key hệ thống' }}</span>
+            <!-- Custom Tooltip for API Key -->
+            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-56 sm:w-64 p-2.5 bg-slate-800 text-slate-100 text-xs text-center font-normal rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none border border-slate-700">
+              {{ isProcessing ? 'Không thể cấu hình API Key khi đang dịch' : (hasUserApiKey ? 'Click chỉnh sửa hoặc xóa API Key riêng của bạn' : 'Click để tự cấu hình API Key cá nhân') }}
+              <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 border-t border-l border-slate-700 rotate-45 transform origin-center"></div>
+            </div>
           </button>
         </div>
         

@@ -447,9 +447,9 @@ export class App {
       
       if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
         if (!this.userApiKey()) {
-          this.showToast('error', 'Lỗi: Hệ thống AI đang quá tải hoặc đã hết lượt sử dụng (Quota exceeded). Bạn có thể nhập Key của riêng bạn để dùng tiếp.');
+          this.showToast('error', 'Lỗi: Hệ thống AI đã hết lượt sử dụng (Quota exceeded) miễn phí cho Key hệ thống. Bạn có thể nhập Key của riêng bạn để dùng tiếp. Phần nhập Key nằm ở đầu trang.');
         } else {
-          this.showToast('error', 'Lỗi: Hệ thống AI đang quá tải hoặc đã hết lượt sử dụng (Quota exceeded).');
+          this.showToast('error', 'Lỗi: Hệ thống AI đã hết lượt sử dụng (Quota exceeded) miễn phí, bạn có thể sử dụng Key trả phí, hoặc Key miễn phí khác còn hạn ngạch.');
         }
       } 
       else if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {

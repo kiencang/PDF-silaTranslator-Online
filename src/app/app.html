@@ -16,38 +16,42 @@
       <div class="lg:col-span-4 space-y-6">
         
         <!-- Upload Section -->
-        <app-upload-zone
-          [isProcessing]="isProcessing()"
-          [hasFile]="hasFile()"
-          [hasResult]="!!resultHtml()"
-          [selectedFile]="selectedFile()"
-          [pdfTotalPages]="pdfTotalPages()"
-          [pdfStartPage]="pdfStartPage()"
-          [pdfEndPage]="pdfEndPage()"
-          [tokenCount]="tokenCount()"
-          [isCountingTokens]="isCountingTokens()"
-          [currentMaxTokens]="currentMaxTokens()"
-          [tokenPercentage]="tokenPercentage()"
-          [error]="error()"
-          (fileChange)="onFileSelected($event)"
-          (pageChange)="pdfStartPage.set($event.start); pdfEndPage.set($event.end); onPageChange()"
-          (resetApp)="resetApp()"
-        ></app-upload-zone>
+        <div class="block">
+          <app-upload-zone
+            [isProcessing]="isProcessing()"
+            [hasFile]="hasFile()"
+            [hasResult]="!!resultHtml()"
+            [selectedFile]="selectedFile()"
+            [pdfTotalPages]="pdfTotalPages()"
+            [pdfStartPage]="pdfStartPage()"
+            [pdfEndPage]="pdfEndPage()"
+            [tokenCount]="tokenCount()"
+            [isCountingTokens]="isCountingTokens()"
+            [currentMaxTokens]="currentMaxTokens()"
+            [tokenPercentage]="tokenPercentage()"
+            [error]="error()"
+            (fileChange)="onFileSelected($event)"
+            (pageChange)="pdfStartPage.set($event.start); pdfEndPage.set($event.end); onPageChange()"
+            (resetApp)="resetApp()"
+          ></app-upload-zone>
+        </div>
 
         <!-- Configuration Section -->
-        <app-config-section
-          [modeControl]="modeControl"
-          [useGoogleSearchControl]="useGoogleSearchControl"
-          [isHtmlUploaded]="isHtmlUploaded()"
-          [isPdfUploaded]="isPdfUploaded()"
-          [isTwoPhaseMode]="isTwoPhaseMode()"
-          [isProcessing]="isProcessing()"
-          [canProcess]="canProcess()"
-          [hasResultHtml]="!!resultHtml()"
-          [progressMessage]="progressMessage()"
-          (openSettings)="openSettings()"
-          (processFile)="processFile()">
-        </app-config-section>
+        <div class="block">
+          <app-config-section
+            [modeControl]="modeControl"
+            [useGoogleSearchControl]="useGoogleSearchControl"
+            [isHtmlUploaded]="isHtmlUploaded()"
+            [isPdfUploaded]="isPdfUploaded()"
+            [isTwoPhaseMode]="isTwoPhaseMode()"
+            [isProcessing]="isProcessing()"
+            [canProcess]="canProcess()"
+            [hasResultHtml]="!!resultHtml()"
+            [progressMessage]="progressMessage()"
+            (openSettings)="openSettings()"
+            (processFile)="processFile()">
+          </app-config-section>
+        </div>
       </div>
 
       <!-- Right Column: Results -->
@@ -73,7 +77,7 @@
       <p class="text-sm text-slate-600">
         <a href="https://pdf-translator.wpsila.com/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
           Hướng dẫn sử dụng
-        </a> • Nguyễn Đức Anh • contact@wpsila.com • v1.0.43 • <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
+        </a> • Nguyễn Đức Anh • contact@wpsila.com • v1.0.44 • <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
           GitHub
         </a>
       </p>

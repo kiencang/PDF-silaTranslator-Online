@@ -22,7 +22,7 @@ import { LucideAngularModule, Key, X, ExternalLink, EyeOff, Eye, Trash2 } from '
         </div>
         <div class="p-6">
           <p class="text-slate-500 text-sm mb-4 leading-relaxed">
-            Tự cấu hình và sử dụng khóa API (Gemini API Key) riêng để quá trình dịch tài liệu được ổn định nhất, không lo hết lượt dịch giới hạn từ hệ thống chung.
+            Thêm khóa API (Gemini API Key) riêng của bạn, để việc dịch được ổn định, không lo hết giới hạn lượt dịch từ hệ thống chung. Vào phần "Hướng dẫn lấy Key nhanh" ngay bên dưới để tạo Key miễn phí trên AI Studio. Hoặc một cách đơn giản hơn là "Remix" công cụ này về tài khoản của bạn, lúc đó tự động API Key hệ thống chính là Key riêng của bạn.
           </p>
 
           <div class="flex items-center gap-2 text-sm mt-3 bg-slate-50/50 px-3 py-2 rounded-xl border border-slate-100">

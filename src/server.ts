@@ -46,7 +46,7 @@ app.post('/api/gemini/countTokens', async (req, res) => {
   try {
     const activeAi = getAiInstance(req);
     const result = await activeAi.models.countTokens({
-      model: 'gemini-flash-latest',
+      model: 'gemini-flash-lite-latest',
       contents: [
         {
           parts: [

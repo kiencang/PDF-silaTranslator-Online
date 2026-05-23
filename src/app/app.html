@@ -9,7 +9,7 @@
     (openApiKeyModal)="openApiKeyModal()">
   </app-header-controls>
 
-  <main class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8" [attr.inert]="showResetConfirm() ? true : null">
+  <main class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8" [attr.inert]="showResetConfirm() || showHistoryModal() ? true : null">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
       
       <!-- Left Column: Controls & Upload -->
@@ -20,6 +20,7 @@
           <app-upload-zone
             [isProcessing]="isProcessing()"
             [hasFile]="hasFile()"
+            [isHistoryView]="isLoadedFromHistory()"
             [hasResult]="!!resultHtml()"
             [selectedFile]="selectedFile()"
             [pdfTotalPages]="pdfTotalPages()"
@@ -72,20 +73,54 @@
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-slate-200 mt-8" [attr.inert]="showResetConfirm() ? true : null">
-    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-center">
-      <p class="text-sm text-slate-600">
-        <a href="https://pdf-translator.wpsila.com/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
-          Hướng dẫn sử dụng
-        </a> • Nguyễn Đức Anh • contact@wpsila.com • v1.0.44 • <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
-          GitHub
-        </a>
-      </p>
+  <footer class="border-t border-slate-200 mt-8" [attr.inert]="showResetConfirm() || showHistoryModal() ? true : null">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 relative">
+      <!-- Left side: History Button -->
+      <div class="flex items-center justify-center lg:justify-start">
+        <button (click)="openHistory()" class="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 border border-indigo-100 rounded-lg text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer">
+          <lucide-icon [img]="Clock" class="w-3.5 h-3.5"></lucide-icon>
+          Lịch sử dịch
+        </button>
+      </div>
+
+      <!-- Center section -->
+      <div class="lg:absolute lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 flex justify-center text-center w-full lg:w-auto">
+        <p class="text-xs text-slate-500 flex flex-wrap items-center justify-center gap-1.5 lg:whitespace-nowrap">
+          <span class="font-medium text-slate-600">v1.0.45</span>
+          <span class="text-slate-300 select-none">•</span>
+          <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
+            GitHub
+          </a>
+          <span class="text-slate-300 select-none">•</span>
+          <span class="text-slate-400 italic">Chỉ dùng cho mục đích cá nhân</span>
+          <span class="text-slate-300 select-none">•</span>
+          <span class="font-medium text-slate-700">Nguyễn Đức Anh</span>
+          <span class="text-slate-300 select-none">•</span>
+          <a href="mailto:contact@wpsila.com" class="hover:text-indigo-600 hover:underline transition-colors">contact@wpsila.com</a>
+          <span class="text-slate-300 select-none">•</span>
+          <a href="https://pdf-translator.wpsila.com/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
+            Hướng dẫn sử dụng
+          </a>
+        </p>
+      </div>
+
+      <!-- Right placeholder -->
+      <div class="hidden lg:block w-32"></div>
     </div>
   </footer>
 
   <!-- Toast Notifications -->
   <app-toasts></app-toasts>
+
+  <!-- History Modal -->
+  @if (showHistoryModal()) {
+    <app-history-modal
+      [historyItems]="historyItems()"
+      (selectItem)="selectHistoryItem($event)"
+      (deleteItem)="deleteHistoryItem($event)"
+      (closeModal)="closeHistory()">
+    </app-history-modal>
+  }
 
   <!-- Reset Confirmation Modal -->
   @if (showResetConfirm()) {

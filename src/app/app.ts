@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, computed, effect, ViewChild, ElementRef, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, computed, ViewChild, ElementRef, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { GeminiService } from './gemini.service';
@@ -16,13 +16,15 @@ import { UploadZoneComponent } from './upload-zone.component';
 
 import { ConfigSectionComponent } from './config-section.component';
 import { ResultSectionComponent } from './result-section.component';
+import { StorageService, TranslatedDoc } from './storage.service';
+import { HistoryModalComponent } from './history-modal.component';
 
 export type TranslationMode = 'zero_math' | 'zero_svg' | 'normal' | 'phase1' | 'phase2';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, SettingsModalComponent, ApiKeyModalComponent, ToastsComponent, ResetConfirmModalComponent, HeaderControlsComponent, UploadZoneComponent, ConfigSectionComponent, ResultSectionComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, SettingsModalComponent, ApiKeyModalComponent, ToastsComponent, ResetConfirmModalComponent, HeaderControlsComponent, UploadZoneComponent, ConfigSectionComponent, ResultSectionComponent, HistoryModalComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +35,7 @@ export class App {
   private destroyRef = inject(DestroyRef);
   private toastService = inject(ToastService);
   private pdfService = inject(PdfService);
+  private storageService = inject(StorageService);
 
   // Icons
   readonly UploadCloud = UploadCloud;
@@ -108,6 +111,9 @@ export class App {
   private timerInterval: ReturnType<typeof setInterval> | undefined;
   
   showResetConfirm = signal<boolean>(false);
+  showHistoryModal = signal<boolean>(false);
+  historyItems = signal<TranslatedDoc[]>([]);
+  isLoadedFromHistory = signal<boolean>(false);
 
   @ViewChild('resetBtn') resetBtn?: ElementRef<HTMLButtonElement>;
 
@@ -229,6 +235,7 @@ export class App {
   }
 
   onFileSelected(file: File) {
+    this.isLoadedFromHistory.set(false);
     if (file.type === 'application/pdf') {
        this.handleFile(file);
     } else if (file.type === 'text/html' || file.name.endsWith('.html')) {
@@ -440,6 +447,36 @@ export class App {
       } else {
         this.showToast('success', 'Quá trình dịch tài liệu hoàn tất!');
       }
+
+      // Save to history using StorageService
+      const file = this.selectedFile();
+      const content = this.resultHtml();
+      if (file && content) {
+        let vietnameseTitle = file.name;
+        const h1Match = content.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+        if (h1Match) {
+          vietnameseTitle = h1Match[1].replace(/<[^>]*>/g, '').trim();
+        } else {
+          const h2Match = content.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i);
+          if (h2Match) {
+            vietnameseTitle = h2Match[1].replace(/<[^>]*>/g, '').trim();
+          }
+        }
+        
+        if (!vietnameseTitle || vietnameseTitle.length === 0) {
+          vietnameseTitle = file.name;
+        } else if (vietnameseTitle.length > 100) {
+          vietnameseTitle = vietnameseTitle.substring(0, 97) + '...';
+        }
+
+        await this.storageService.saveTranslation({
+          originalFileName: file.name,
+          vietnameseTitle: vietnameseTitle,
+          mode: currentMode,
+          timestamp: Date.now(),
+          content: content
+        }).catch(err => console.error('Lỗi khi lưu lịch sử:', err));
+      }
       
     } catch (e: unknown) {
       console.error(e);
@@ -490,6 +527,7 @@ export class App {
       clearInterval(this.timerInterval);
     }
     this.selectedFile.set(null);
+    this.isLoadedFromHistory.set(false);
     this.fileBase64.set(null);
     this.mimeType.set('');
     this.resultHtml.set(null);
@@ -529,5 +567,50 @@ export class App {
       URL.revokeObjectURL(url);
       this.showToast('success', 'Đã tải file HTML xuống máy.');
     }
+  }
+
+  async openHistory() {
+    try {
+      const items = await this.storageService.getAll();
+      this.historyItems.set(items);
+      this.showHistoryModal.set(true);
+    } catch (err) {
+      console.error('Không thể tải lịch sử:', err);
+      this.showToast('error', 'Không thể đọc dữ liệu lịch sử dịch.');
+    }
+  }
+
+  closeHistory() {
+    this.showHistoryModal.set(false);
+  }
+
+  async deleteHistoryItem(id: number) {
+    try {
+      await this.storageService.delete(id);
+      const items = await this.storageService.getAll();
+      this.historyItems.set(items);
+      this.showToast('success', 'Đã xóa bản dịch khỏi lịch sử thành công.');
+    } catch (err) {
+      console.error('Không thể xóa item:', err);
+      this.showToast('error', 'Không thể xóa bản dịch khỏi lịch sử.');
+    }
+  }
+
+  selectHistoryItem(doc: TranslatedDoc) {
+    const isHtml = doc.mode === 'phase2';
+    const dummyFile = new File([], doc.originalFileName, { type: isHtml ? 'text/html' : 'application/pdf' });
+    
+    this.selectedFile.set(dummyFile);
+    this.isLoadedFromHistory.set(true);
+    this.mimeType.set(dummyFile.type);
+    this.resultHtml.set(doc.content);
+    this.modeControl.setValue(doc.mode as TranslationMode);
+    this.mode.set(doc.mode as TranslationMode);
+    this.tokenCount.set(0);
+    this.error.set(null);
+    this.progressMessage.set('Đã khôi phục từ lịch sử');
+    this.showHistoryModal.set(false);
+    
+    this.showToast('success', 'Đã khôi phục thành công bản dịch từ lịch sử dịch!');
   }
 }

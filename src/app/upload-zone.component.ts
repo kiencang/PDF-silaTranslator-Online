@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, RefreshCw, UploadCloud, CheckCircle2, Scissors, Loader2, FileEdit, AlertCircle } from 'lucide-angular';
+import { LucideAngularModule, RefreshCw, UploadCloud, CheckCircle2, Scissors, Loader2, FileEdit, AlertCircle, Clock } from 'lucide-angular';
 
 @Component({
   selector: 'app-upload-zone',
@@ -66,6 +66,25 @@ import { LucideAngularModule, RefreshCw, UploadCloud, CheckCircle2, Scissors, Lo
                   <span class="block">HTML (max 0.5 MB / 35K token)</span>
                 </p>
               </div>
+            </div>
+          } @else if (isHistoryView) {
+            <div class="flex flex-col items-center gap-3 w-full">
+              <div class="p-3 bg-indigo-50 text-indigo-600 rounded-full">
+                <lucide-icon [img]="Clock" class="w-6 h-6" aria-hidden="true"></lucide-icon>
+              </div>
+              <div class="text-center w-full px-2">
+                <span class="text-[10px] font-semibold text-indigo-700 bg-indigo-100/60 uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block mb-1.5 border border-indigo-150">
+                  Đang xem lịch sử dịch
+                </span>
+                <p class="text-xs font-semibold text-slate-800 break-all max-w-[260px] mx-auto leading-relaxed" title="{{ selectedFile?.name }}">
+                  {{ selectedFile?.name }}
+                </p>
+              </div>
+
+              <button class="inline-flex items-center gap-1.5 px-3 py-1.5 mt-2 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 shadow-sm rounded-lg transition-all cursor-pointer" (click)="fileInput.click(); $event.stopPropagation()">
+                <lucide-icon [img]="UploadCloud" class="w-3.5 h-3.5" aria-hidden="true"></lucide-icon>
+                Tải tệp mới lên
+              </button>
             </div>
           } @else {
             <div class="flex flex-col items-center gap-3 w-full">
@@ -150,9 +169,11 @@ export class UploadZoneComponent {
   readonly Loader2 = Loader2;
   readonly FileEdit = FileEdit;
   readonly AlertCircle = AlertCircle;
+  readonly Clock = Clock;
 
   @Input() isProcessing = false;
   @Input() hasFile = false;
+  @Input() isHistoryView = false;
   @Input() hasResult = false;
   @Input() selectedFile: File | null = null;
   @Input() pdfTotalPages = 0;

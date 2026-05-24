@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, X, FileText, Trash2, Eye, Clock } from 'lucide-angular';
+import { LucideAngularModule, X, FileText, Trash2, Eye, Clock, AlertCircle } from 'lucide-angular';
 import { TranslatedDoc } from './storage.service';
 
 @Component({
@@ -13,19 +13,24 @@ import { TranslatedDoc } from './storage.service';
       <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-0 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[80vh]">
         
         <!-- Header -->
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <lucide-icon [img]="Clock" class="w-4 h-4"></lucide-icon>
-            </div>
-            <div>
+        <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <lucide-icon [img]="Clock" class="w-4 h-4"></lucide-icon>
+              </div>
               <h3 id="history-title" class="text-lg font-semibold text-slate-900">Lịch sử dịch gần đây</h3>
-              <p class="text-xs text-slate-500 mt-1 leading-relaxed max-w-lg">Danh sách 10 file gần nhất bạn dịch/chuyển đổi định dạng. Chúng được lưu cục bộ trên trình duyệt đang dùng để tiện xem lại. Hãy chủ động "Tải bản dịch" để lưu trữ lâu dài, danh sách này có thể bị mất nếu bạn xóa dữ liệu web.</p>
             </div>
+            <button (click)="closeModal.emit()" class="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-lg p-1.5 cursor-pointer shrink-0" aria-label="Đóng">
+              <lucide-icon [img]="X" class="w-5 h-5" aria-hidden="true"></lucide-icon>
+            </button>
           </div>
-          <button (click)="closeModal.emit()" class="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-lg p-1.5 cursor-pointer" aria-label="Đóng">
-            <lucide-icon [img]="X" class="w-5 h-5" aria-hidden="true"></lucide-icon>
-          </button>
+          <div class="mt-4 flex gap-2.5 bg-amber-50/70 border border-amber-100/60 rounded-xl p-3">
+            <lucide-icon [img]="AlertCircle" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></lucide-icon>
+            <p class="text-xs tracking-wide text-amber-800/90 leading-relaxed">
+              Danh sách 10 file gần nhất bạn dịch/chuyển đổi định dạng. Chúng được lưu cục bộ trên trình duyệt đang dùng để tiện xem lại. Hãy chủ động "Tải bản dịch" để lưu trữ lâu dài, danh sách này có thể bị mất nếu bạn xóa dữ liệu web.
+            </p>
+          </div>
         </div>
 
         <!-- Body -->
@@ -76,16 +81,32 @@ import { TranslatedDoc } from './storage.service';
 
                   <!-- Actions -->
                   <div class="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-                    <button (click)="selectItem.emit(item)" 
-                            class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer" 
-                            title="Xem lại bản dịch">
-                      <lucide-icon [img]="Eye" class="w-4 h-4"></lucide-icon>
-                    </button>
-                    <button (click)="onDelete(item.id!, $event)" 
-                            class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" 
-                            title="Xóa khỏi lịch sử">
-                      <lucide-icon [img]="Trash2" class="w-4 h-4"></lucide-icon>
-                    </button>
+                    @if (deletingItemId === item.id) {
+                      <div class="flex items-center gap-1 bg-red-50 rounded-lg p-1.5 border border-red-100 animate-in fade-in slide-in-from-right-4 duration-200">
+                        <span class="text-xs text-red-600 font-medium px-1">Bạn muốn xóa?</span>
+                        <button (click)="confirmDelete(item.id!, $event)" 
+                                class="p-1 px-2 text-xs font-medium text-white bg-red-500 hover:bg-red-600 rounded transition-colors cursor-pointer" 
+                                title="Chắc chắn xóa">
+                          Xóa
+                        </button>
+                        <button (click)="cancelDelete($event)" 
+                                class="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors cursor-pointer" 
+                                title="Hủy">
+                          <lucide-icon [img]="X" class="w-3 h-3"></lucide-icon>
+                        </button>
+                      </div>
+                    } @else {
+                      <button (click)="selectItem.emit(item)" 
+                              class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer" 
+                              title="Xem lại bản dịch">
+                        <lucide-icon [img]="Eye" class="w-4 h-4"></lucide-icon>
+                      </button>
+                      <button (click)="onDeleteRequest(item.id!, $event)" 
+                              class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer" 
+                              title="Xóa khỏi lịch sử">
+                        <lucide-icon [img]="Trash2" class="w-4 h-4"></lucide-icon>
+                      </button>
+                    }
                   </div>
                 </div>
               }
@@ -102,11 +123,14 @@ export class HistoryModalComponent {
   readonly Trash2 = Trash2;
   readonly Eye = Eye;
   readonly Clock = Clock;
+  readonly AlertCircle = AlertCircle;
 
   @Input() historyItems: TranslatedDoc[] = [];
   @Output() selectItem = new EventEmitter<TranslatedDoc>();
   @Output() deleteItem = new EventEmitter<number>();
   @Output() closeModal = new EventEmitter<void>();
+
+  deletingItemId: number | null = null;
 
   getModeLabel(mode: string): string {
     switch (mode) {
@@ -129,8 +153,19 @@ export class HistoryModalComponent {
     return `${hours}:${minutes} - ${day}/${month}/${year}`;
   }
 
-  onDelete(id: number, event: MouseEvent) {
+  onDeleteRequest(id: number, event: MouseEvent) {
+    event.stopPropagation();
+    this.deletingItemId = id;
+  }
+
+  confirmDelete(id: number, event: MouseEvent) {
     event.stopPropagation();
     this.deleteItem.emit(id);
+    this.deletingItemId = null;
+  }
+
+  cancelDelete(event: MouseEvent) {
+    event.stopPropagation();
+    this.deletingItemId = null;
   }
 }

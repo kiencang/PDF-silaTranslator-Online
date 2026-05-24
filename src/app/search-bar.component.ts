@@ -110,6 +110,9 @@ export class SearchBarComponent {
       else if (errorMessage.toLowerCase().includes('safety') || errorMessage.toLowerCase().includes('blocked')) {
         this.toastService.show('error', 'Lỗi: Tài liệu bị từ chối do vi phạm chính sách an toàn của Google.');
       }
+      else if (errorMessage.includes('JSON.parse: unexpected character')) {
+        this.toastService.show('error', 'Lỗi: Máy chủ nhận quá nhiều yêu cầu hoặc phản hồi lỗi. Vui lòng thử lại sau vài giây.');
+      }
       else {
         let simplifiedMsg = errorMessage;
         try {

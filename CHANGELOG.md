@@ -12,6 +12,7 @@ Ví dụ 1.0.19.i nghĩa là phiên bản này có lõi giống y phiên bản 1
 ## [1.0.47] - 2026-05-23
 ### Fixed
 - Tinh chỉnh modal `Lịch sử dịch`.
+- Tái cấu trúc mã.
 
 ## [1.0.46] - 2026-05-23
 ### Fixed

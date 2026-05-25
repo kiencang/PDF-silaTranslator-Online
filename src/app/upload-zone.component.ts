@@ -24,7 +24,7 @@ import { LucideAngularModule, RefreshCw, UploadCloud, CheckCircle2, Scissors, Lo
           [attr.role]="!hasFile ? 'button' : null"
           [attr.tabindex]="!hasFile ? '0' : null"
           [attr.aria-label]="!hasFile ? 'Khu vực tải lên tài liệu. Nhấn Enter hoặc Space để chọn file' : null"
-          class="border-2 rounded-xl p-8 text-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          class="relative border-2 rounded-xl p-8 text-center transition-all duration-200 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2"
           [class.cursor-pointer]="!hasFile"
           [class.border-dashed]="!isDragging()"
           [class.border-solid]="isDragging()"
@@ -44,10 +44,11 @@ import { LucideAngularModule, RefreshCw, UploadCloud, CheckCircle2, Scissors, Lo
           <input 
             type="file" 
             #fileInput 
-            class="hidden" 
+            class="hidden"
             accept="application/pdf,text/html" 
             (change)="onFileSelected($event, fileInput)"
             [disabled]="isProcessing"
+            title="Click để tải tài liệu lên"
           >
           
           @if (!hasFile) {

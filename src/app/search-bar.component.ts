@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Search, Loader2, X, ExternalLink } from 'lucide-angular';
@@ -22,7 +22,7 @@ import { ToastService } from './toast.service';
       <input 
         type="text" 
         #searchInput
-        [disabled]="isSearching()"
+        [disabled]="isSearching() || isProcessing()"
         (keydown.enter)="onSearch(searchInput.value)"
         aria-label="Tìm kiếm tài liệu trên Google Scholar"
         role="combobox"
@@ -72,6 +72,7 @@ export class SearchBarComponent {
   private toastService = inject(ToastService);
 
   isSearching = signal<boolean>(false);
+  isProcessing = input<boolean>(false);
   translatedQuery = signal<string>('');
   searchQuery = signal<string>('');
 
@@ -99,9 +100,9 @@ export class SearchBarComponent {
 
       if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
         if (!hasUserKey) {
-          this.toastService.show('error', 'Lỗi: Hệ thống AI đã hết lượt sử dụng (Quota exceeded) miễn phí cho Key hệ thống. Bạn có thể nhập Key của riêng bạn để dùng tiếp. Phần nhập Key nằm ở đầu trang.');
+          this.toastService.show('error', 'Lỗi: API Key của bạn đã vượt quá giới hạn (Quota exceeded). Vui lòng thử lại sau hoặc sử dụng Key khác.');
         } else {
-          this.toastService.show('error', 'Lỗi: Hệ thống AI đã hết lượt sử dụng (Quota exceeded) miễn phí, bạn có thể sử dụng Key trả phí, hoặc Key miễn phí khác còn hạn ngạch.');
+          this.toastService.show('error', 'Lỗi: API Key của bạn đã vượt quá giới hạn (Quota exceeded). Vui lòng thử lại sau hoặc sử dụng Key khác.');
         }
       } 
       else if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {

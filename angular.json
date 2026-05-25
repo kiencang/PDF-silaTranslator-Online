@@ -59,10 +59,7 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true,
-              "externalDependencies": [
-                "@google/genai"
-              ]
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"

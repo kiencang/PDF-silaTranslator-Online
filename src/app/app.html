@@ -77,7 +77,15 @@
     <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 relative">
       <!-- Left side: History Button -->
       <div class="flex items-center justify-center lg:justify-start">
-        <button (click)="openHistory()" class="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 border border-indigo-100 rounded-lg text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer">
+        <button 
+          (click)="openHistory()" 
+          [disabled]="isProcessing()"
+          class="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg border shadow-sm transition-all duration-150"
+          [class.cursor-not-allowed]="isProcessing()"
+          [class.cursor-pointer]="!isProcessing()"
+          [ngClass]="isProcessing() 
+            ? 'bg-slate-50 border-slate-200 text-slate-400' 
+            : 'bg-indigo-50 border-indigo-100 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800'">
           <lucide-icon [img]="Clock" class="w-3.5 h-3.5"></lucide-icon>
           Lịch sử dịch
         </button>
@@ -86,7 +94,7 @@
       <!-- Center section -->
       <div class="lg:absolute lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 flex justify-center text-center w-full lg:w-auto">
         <p class="text-xs text-slate-500 flex flex-wrap items-center justify-center gap-1.5 lg:whitespace-nowrap">
-          <span class="font-medium text-slate-600">v1.0.47</span>
+          <span class="font-medium text-slate-600">v1.0.48</span>
           <span class="text-slate-300 select-none">•</span>
           <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
             GitHub

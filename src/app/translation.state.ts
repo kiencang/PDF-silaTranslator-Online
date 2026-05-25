@@ -168,9 +168,8 @@ export class TranslationState {
         this.showToast('error', `Lỗi: Nội dung vượt quá giới hạn ${maxTokens.toLocaleString()} tokens (${tokens.toLocaleString()} tokens). Vui lòng cắt bớt trang hoặc giảm dung lượng.`);
       }
     } catch (e: unknown) {
-      console.error('Không thể đếm token', e);
       const msg = e instanceof Error ? e.message : String(e);
-      this.showToast('error', `Lỗi khi kiểm tra dung lượng tài liệu: ${msg}`);
+      this.showToast('error', `Lỗi khi kiểm tra dung lượng API Key: ${msg}`);
     } finally {
       this.isCountingTokens.set(false);
     }
@@ -274,9 +273,9 @@ export class TranslationState {
       
       if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
         if (!this.userApiKey()) {
-          this.showToast('error', 'Lỗi: Hệ thống AI đã hết lượt sử dụng (Quota exceeded) miễn phí cho Key hệ thống. Bạn có thể nhập Key của riêng bạn để dùng tiếp. Phần nhập Key nằm ở đầu trang.');
+          this.showToast('error', 'Lỗi: API Key của bạn đã vượt quá giới hạn (Quota exceeded). Vui lòng thử lại sau hoặc sử dụng Key khác.');
         } else {
-          this.showToast('error', 'Lỗi: Hệ thống AI đã hết lượt sử dụng (Quota exceeded) miễn phí, bạn có thể sử dụng Key trả phí, hoặc Key miễn phí khác còn hạn ngạch.');
+          this.showToast('error', 'Lỗi: API Key của bạn đã vượt quá giới hạn (Quota exceeded). Vui lòng thử lại sau hoặc sử dụng Key khác.');
         }
       } 
       else if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {

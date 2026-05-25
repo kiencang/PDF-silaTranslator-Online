@@ -185,7 +185,7 @@ export class App {
     if (keyVal) {
       this.showToast('success', 'Đã lưu cấu hình API Key cá nhân của bạn!');
     } else {
-      this.showToast('info', 'Đã xóa cấu hình API Key cá nhân. Hệ thống quay lại sử dụng Key mặc định.');
+      this.showToast('info', 'Bạn chưa cấu hình API Key. Ứng dụng client-side sẽ cần Key này để hoạt động.');
     }
   }
 
@@ -196,7 +196,7 @@ export class App {
     this.translationState.userApiKey.set('');
     this.tempApiKey.set('');
     this.showApiKeyModal.set(false);
-    this.showToast('info', 'Đã xóa cấu hình API Key cá nhân. Hệ thống quay lại sử dụng Key mặc định.');
+    this.showToast('info', 'Đã xóa cấu hình API Key. Hãy cấu hình lại để tiếp tục sử dụng.');
   }
 
   toggleShowKeyPlain() {

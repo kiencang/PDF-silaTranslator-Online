@@ -10,7 +10,7 @@ import { LucideAngularModule, Key, X, ExternalLink, EyeOff, Eye, Trash2 } from '
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" role="dialog" aria-modal="true" aria-labelledby="api-key-title">
-      <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-0 animate-in zoom-in-95 duration-200 overflow-hidden">
+      <div class="bg-white rounded-2xl shadow-xl max-w-xl w-full p-0 animate-in zoom-in-95 duration-200 overflow-hidden">
         <div class="p-5 border-b border-slate-100 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <lucide-icon [img]="Key" class="w-5 h-5 text-slate-800" aria-hidden="true"></lucide-icon>
@@ -22,18 +22,18 @@ import { LucideAngularModule, Key, X, ExternalLink, EyeOff, Eye, Trash2 } from '
         </div>
         <div class="p-6">
           <p class="text-slate-500 text-sm mb-4 leading-relaxed">
-            Thêm khóa API (Gemini API Key) riêng của bạn, để việc dịch được ổn định, không lo hết giới hạn lượt dịch từ hệ thống chung. Vào phần "Hướng dẫn lấy Key nhanh" ngay bên dưới để tạo Key miễn phí trên AI Studio. Hoặc một cách đơn giản hơn là "Remix" công cụ này về tài khoản của bạn, lúc đó tự động API Key hệ thống chính là Key riêng của bạn.
+            Để sử dụng công cụ dịch file PDF này bạn cần khóa API Key của Gemini. Bạn hãy vào link "Nơi lấy API Key Gemini" để thao tác. Bạn chỉ cần tạo Key miễn phí là đủ dùng.
           </p>
 
           <div class="flex items-center gap-2 text-sm mt-3 bg-slate-50/50 px-3 py-2 rounded-xl border border-slate-100">
             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
                   [ngClass]="hasUserApiKey ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200'">
-              {{ hasUserApiKey ? 'Đang dùng API Key của bạn' : 'Đang dùng key hệ thống' }}
+              {{ hasUserApiKey ? 'Đang dùng API Key của bạn' : 'Bạn chưa nhập API Key cho ứng dụng' }}
             </span>
             <span class="text-slate-300">|</span>
             <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-medium transition-colors cursor-pointer">
               <lucide-icon [img]="ExternalLink" class="w-3.5 h-3.5" aria-hidden="true"></lucide-icon>
-              <span>Hướng dẫn lấy Key nhanh</span>
+              <span>Nơi lấy API Key Gemini</span>
             </a>
           </div>
 
@@ -75,9 +75,6 @@ import { LucideAngularModule, Key, X, ExternalLink, EyeOff, Eye, Trash2 } from '
             }
           </div>
           <div class="flex gap-3">
-            <button (click)="closeModal.emit()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400 cursor-pointer">
-              Hủy
-            </button>
             <button (click)="onSaveApiKey()" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm shadow-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer">
               Lưu cấu hình
             </button>

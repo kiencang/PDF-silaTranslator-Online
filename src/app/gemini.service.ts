@@ -1,72 +1,52 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-
-interface GeminiCandidate {
-  content?: {
-    parts?: { text?: string }[];
-  };
-  finishReason?: string;
-}
-
-interface GeminiResponse {
-  candidates?: GeminiCandidate[];
-}
+import { Injectable } from '@angular/core';
+import { GoogleGenAI } from '@google/genai';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GeminiService {
-  private http = inject(HttpClient);
   private readonly MODEL_NAME_PRO = 'gemini-pro-latest';
   private readonly MODEL_NAME_FLASH = 'gemini-flash-latest';
 
-  private getHeaders(): Record<string, string> {
-    const headers: Record<string, string> = {};
+  private getAiInstance(): GoogleGenAI {
     if (typeof localStorage !== 'undefined') {
       const userKey = localStorage.getItem('sila_pdf_translator_user_api_key');
       if (userKey && userKey.trim() !== '') {
-        headers['x-gemini-api-key'] = userKey.trim();
+        return new GoogleGenAI({ 
+           apiKey: userKey.trim(),
+           // When calling from browser, the SDK handles CORS properly with rest endpoints.
+        });
       }
     }
-    return headers;
-  }
-
-  private handleError(e: unknown, defaultMsg: string): never {
-    if (e instanceof HttpErrorResponse) {
-      // Khi server trả về trang HTML (VD 502 Bad Gateway) hoặc lỗi quá tải, HttpClient parse JSON thất bại
-      if (e.message && e.message.includes('JSON.parse: unexpected character')) {
-        throw new Error(`Server bị quá tải hoặc phản hồi không hợp lệ (${e.status}). Vui lòng thử lại sau.`);
-      } else if (e.error?.error) {
-         let errorMsg = defaultMsg;
-         if (typeof e.error.error === 'string') {
-            errorMsg = e.error.error;
-         } else if (e.error.error.message) {
-            errorMsg = e.error.error.message;
-         }
-         throw new Error(errorMsg);
-      } else if (e.message) {
-         throw new Error(e.message);
-      }
-    } else if (e instanceof Error) {
-      throw new Error(e.message);
-    }
-    throw new Error(defaultMsg);
+    throw new Error('Vui lòng thiết lập "API Key cá nhân" trong phần Cấu hình để sử dụng ứng dụng (phiên bản Client-side bắt buộc sử dụng Key riêng).');
   }
 
   async countTokens(fileData: string, mimeType: string): Promise<number> {
     try {
-      const response = await firstValueFrom(
-        this.http.post<{ totalTokens: number }>('/api/gemini/countTokens', { fileData, mimeType }, { headers: this.getHeaders() })
-      );
-      return response.totalTokens || 0;
+      const ai = this.getAiInstance();
+      const contentParts = mimeType === 'text/html' ? [{ text: fileData }] : [{
+        inlineData: {
+          data: fileData,
+          mimeType: mimeType
+        }
+      }];
+      
+      const result = await ai.models.countTokens({
+        model: 'gemini-flash-lite-latest',
+        contents: [
+          { parts: contentParts as any }
+        ]
+      });
+      return result.totalTokens || 0;
     } catch (e: unknown) {
-      console.error(e);
-      return 0;
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      }
+      throw new Error('Lỗi khi tính số token.');
     }
   }
 
-  private checkResponse(response: GeminiResponse): string {
+  private extractTextFromResponse(response: any): string {
     const candidate = response.candidates?.[0];
     if (candidate?.finishReason) {
       const reason = candidate.finishReason;
@@ -77,7 +57,7 @@ export class GeminiService {
       }
     }
 
-    const text = candidate?.content?.parts?.[0]?.text;
+    const text = response.text;
     if (!text) {
       throw new Error('Gemini không trả về kết quả (có thể do lỗi hệ thống hoặc bộ lọc). Vui lòng thử lại.');
     }
@@ -93,37 +73,41 @@ export class GeminiService {
     useGoogleSearch = false,
     modelName: string = this.MODEL_NAME_PRO
   ): Promise<string> {
-    const config = {
+    const ai = this.getAiInstance();
+    const config: any = {
       systemInstruction: { parts: [{ text: systemInstruction }] },
       thinkingConfig: { thinkingLevel: 'HIGH' }
     };
     
-    const tools = useGoogleSearch ? [{ googleSearch: {} }] : undefined;
+    if (useGoogleSearch) {
+      config.tools = [{ googleSearch: {} }];
+    }
 
     try {
-      const response = await firstValueFrom(
-        this.http.post<GeminiResponse>('/api/gemini/generate', {
-          model: modelName,
-          contents: [
-            {
-              parts: [
-                {
-                  inlineData: {
-                    data: fileData,
-                    mimeType: mimeType
-                  }
-                },
-                { text: prompt }
-              ]
-            }
-          ],
-          config: { ...config, tools }
-        }, { headers: this.getHeaders() })
-      );
+      const response = await ai.models.generateContent({
+        model: modelName,
+        contents: [
+          {
+            parts: [
+              {
+                inlineData: {
+                  data: fileData,
+                  mimeType: mimeType
+                }
+              },
+              { text: prompt }
+            ]
+          }
+        ],
+        config
+      });
 
-      return this.checkResponse(response);
+      return this.extractTextFromResponse(response);
     } catch (e: unknown) {
-      this.handleError(e, 'Lỗi không xác định khi dịch tài liệu');
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      }
+      throw new Error('Lỗi không xác định khi dịch tài liệu');
     }
   }
 
@@ -134,35 +118,40 @@ export class GeminiService {
     useGoogleSearch = false,
     modelName: string = this.MODEL_NAME_PRO
   ): Promise<string> {
-    const config = {
+    const ai = this.getAiInstance();
+    const config: any = {
       systemInstruction: { parts: [{ text: systemInstruction }] },
       thinkingConfig: { thinkingLevel: 'HIGH' }
     };
-    const tools = useGoogleSearch ? [{ googleSearch: {} }] : undefined;
+    if (useGoogleSearch) {
+      config.tools = [{ googleSearch: {} }];
+    }
 
     try {
-      const response = await firstValueFrom(
-        this.http.post<GeminiResponse>('/api/gemini/generate', {
-          model: modelName,
-          contents: [
-            {
-              parts: [
-                { text: htmlContent },
-                { text: prompt }
-              ]
-            }
-          ],
-          config: { ...config, tools }
-        }, { headers: this.getHeaders() })
-      );
+      const response = await ai.models.generateContent({
+        model: modelName,
+        contents: [
+          {
+            parts: [
+              { text: htmlContent },
+              { text: prompt }
+            ]
+          }
+        ],
+        config
+      });
 
-      return this.checkResponse(response);
+      return this.extractTextFromResponse(response);
     } catch (e: unknown) {
-      this.handleError(e, 'Lỗi khi dịch HTML');
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      }
+      throw new Error('Lỗi khi dịch HTML');
     }
   }
 
   async translateSearchQuery(query: string): Promise<string> {
+    const ai = this.getAiInstance();
     const systemInstruction = `Bạn là một AI chuyên dịch truy vấn tìm kiếm (search queries) từ tiếng Việt sang Tiếng Anh. Nhiệm vụ DUY NHẤT của bạn là trả về MỘT (1) truy vấn tìm kiếm tiếng Anh hiệu quả nhất, dựa trên đánh giá của bạn về ý định (search intent) và cách tìm kiếm phổ biến nhất trong tiếng Anh.
 
 QUY TẮC BẮT BUỘC TUÂN THỦ:
@@ -175,22 +164,23 @@ QUY TẮC BẮT BUỘC TUÂN THỦ:
     const prompt = `Provide the single best English search query translation for the following Vietnamese query. Output ONLY the raw English text, nothing else: ${query}`;
 
     try {
-      const response = await firstValueFrom(
-        this.http.post<GeminiResponse>('/api/gemini/generate', {
-          model: this.MODEL_NAME_FLASH,
-          contents: [
-            { parts: [{ text: prompt }] }
-          ],
-          config: {
-            systemInstruction: { parts: [{ text: systemInstruction }] }
-          }
-        }, { headers: this.getHeaders() })
-      );
+      const response = await ai.models.generateContent({
+        model: this.MODEL_NAME_FLASH,
+        contents: [
+          { parts: [{ text: prompt }] }
+        ],
+        config: {
+          systemInstruction: { parts: [{ text: systemInstruction }] }
+        }
+      });
 
-      const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
-      return (text || '').trim();
+      return (response.text || '').trim();
     } catch (e: unknown) {
-      this.handleError(e, 'Lỗi khi dịch từ khóa');
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      }
+      throw new Error('Lỗi khi dịch từ khóa');
     }
   }
 }
+

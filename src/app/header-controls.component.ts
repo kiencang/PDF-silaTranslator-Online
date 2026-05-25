@@ -79,7 +79,7 @@ import { SearchBarComponent } from './search-bar.component';
               : (isProcessing ? 'bg-slate-50/50 border-slate-100 text-slate-400' : 'bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-600')"
           >
             <lucide-icon [img]="Key" class="w-3.5 h-3.5" [ngClass]="hasUserApiKey ? 'text-emerald-600' : 'text-slate-400'"></lucide-icon>
-            <span>{{ hasUserApiKey ? 'Đang dùng key của bạn' : 'Key hệ thống' }}</span>
+            <span>{{ hasUserApiKey ? 'Đang dùng key của bạn' : 'Nhập API Key' }}</span>
             <!-- Custom Tooltip for API Key -->
             <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-56 sm:w-64 p-2.5 bg-slate-800 text-slate-100 text-xs text-center font-normal rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none border border-slate-700">
               {{ isProcessing ? 'Không thể cấu hình API Key khi đang dịch' : (hasUserApiKey ? 'Click chỉnh sửa hoặc xóa API Key riêng của bạn' : 'Click để tự cấu hình API Key cá nhân') }}
@@ -88,7 +88,7 @@ import { SearchBarComponent } from './search-bar.component';
           </button>
         </div>
         
-        <app-search-bar></app-search-bar>
+        <app-search-bar [isProcessing]="isProcessing"></app-search-bar>
       </div>
     </header>
   `

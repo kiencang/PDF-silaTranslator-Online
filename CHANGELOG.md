@@ -14,6 +14,7 @@ Ví dụ 1.0.19.i nghĩa là phiên bản này có lõi giống y phiên bản 1
 - Điều chỉnh vị trí của button nhập API Key để tránh nó chiếm diện tích header.
 - Làm cho toggle chuyển đổi model nổi bật hơn.
 - Loại trừ các thông báo lỗi dư thừa ở console để tránh người dùng hiểu nhầm ứng dụng lỗi, trong khi đó chỉ là lỗi do thiếu API key. Thông báo Toast là đủ rồi.
+- Thay đổi font chữ của logo.
 
 ## [1.0.48] - 2026-05-25
 ### Fixed

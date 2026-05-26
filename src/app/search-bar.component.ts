@@ -87,7 +87,6 @@ export class SearchBarComponent {
       const result = await this.geminiService.translateSearchQuery(query);
       this.translatedQuery.set(result);
     } catch (e: unknown) {
-      console.error('Lỗi khi dịch từ khóa tìm kiếm', e);
       const errorMessage = e instanceof Error ? e.message : String(e);
       
       let hasUserKey = false;

@@ -268,7 +268,6 @@ export class TranslationState {
       await this.saveToHistory();
       
     } catch (e: unknown) {
-      console.error(e);
       const errorMessage = e instanceof Error ? e.message : String(e);
       
       if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {

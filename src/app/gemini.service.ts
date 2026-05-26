@@ -34,7 +34,7 @@ export class GeminiService {
       const result = await ai.models.countTokens({
         model: 'gemini-flash-lite-latest',
         contents: [
-          { parts: contentParts as any }
+          { parts: contentParts as unknown as Record<string, unknown>[] }
         ]
       });
       return result.totalTokens || 0;
@@ -46,7 +46,7 @@ export class GeminiService {
     }
   }
 
-  private extractTextFromResponse(response: any): string {
+  private extractTextFromResponse(response: { candidates?: { finishReason?: string }[]; text?: string }): string {
     const candidate = response.candidates?.[0];
     if (candidate?.finishReason) {
       const reason = candidate.finishReason;
@@ -74,13 +74,13 @@ export class GeminiService {
     modelName: string = this.MODEL_NAME_PRO
   ): Promise<string> {
     const ai = this.getAiInstance();
-    const config: any = {
+    const config: Record<string, unknown> = {
       systemInstruction: { parts: [{ text: systemInstruction }] },
       thinkingConfig: { thinkingLevel: 'HIGH' }
     };
     
     if (useGoogleSearch) {
-      config.tools = [{ googleSearch: {} }];
+      config['tools'] = [{ googleSearch: {} }];
     }
 
     try {
@@ -119,12 +119,12 @@ export class GeminiService {
     modelName: string = this.MODEL_NAME_PRO
   ): Promise<string> {
     const ai = this.getAiInstance();
-    const config: any = {
+    const config: Record<string, unknown> = {
       systemInstruction: { parts: [{ text: systemInstruction }] },
       thinkingConfig: { thinkingLevel: 'HIGH' }
     };
     if (useGoogleSearch) {
-      config.tools = [{ googleSearch: {} }];
+      config['tools'] = [{ googleSearch: {} }];
     }
 
     try {

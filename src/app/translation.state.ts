@@ -268,26 +268,22 @@ export class TranslationState {
       await this.saveToHistory();
       
     } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : String(e);
+      const parsedError = this.geminiService.parseGeminiError(e);
       
-      if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
-        if (!this.userApiKey()) {
-          this.showToast('error', 'Lỗi: API Key của bạn đã vượt quá giới hạn (Quota exceeded). Vui lòng thử lại sau hoặc sử dụng Key khác.');
-        } else {
-          this.showToast('error', 'Lỗi: API Key của bạn đã vượt quá giới hạn (Quota exceeded). Vui lòng thử lại sau hoặc sử dụng Key khác.');
-        }
+      if (parsedError.includes('429') || parsedError.toLowerCase().includes('quota')) {
+        this.showToast('error', 'Lỗi: API Key của bạn đã vượt quá giới hạn (Quota exceeded). Vui lòng thử lại sau hoặc sử dụng Key khác.');
       } 
-      else if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+      else if (parsedError.includes('503') || parsedError.toLowerCase().includes('overloaded')) {
         this.showToast('error', 'Lỗi: Máy chủ AI hiện đang bận (Overloaded). Vui lòng thử lại sau.');
       }
-      else if (errorMessage.toLowerCase().includes('safety') || errorMessage.toLowerCase().includes('blocked')) {
+      else if (parsedError.toLowerCase().includes('safety') || parsedError.toLowerCase().includes('blocked')) {
         this.showToast('error', 'Lỗi: Tài liệu bị từ chối do vi phạm chính sách an toàn của Google.');
       }
-      else if (errorMessage.includes('JSON.parse: unexpected character')) {
+      else if (parsedError.includes('JSON.parse: unexpected character')) {
         this.showToast('error', 'Lỗi: Máy chủ nhận quá nhiều yêu cầu hoặc phản hồi lỗi. Vui lòng thử lại sau vài giây.');
       }
       else {
-        this.showToast('error', `Lỗi: ${errorMessage}`);
+        this.showToast('error', `Lỗi: ${parsedError}`);
       }
     } finally {
       this.isProcessing.set(false);

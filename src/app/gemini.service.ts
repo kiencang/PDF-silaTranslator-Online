@@ -182,5 +182,30 @@ QUY TẮC BẮT BUỘC TUÂN THỦ:
       throw new Error('Lỗi khi dịch từ khóa');
     }
   }
+
+  public parseGeminiError(e: unknown): string {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    if (!errorMessage) {
+      return 'Lỗi không xác định';
+    }
+
+    try {
+      if (errorMessage.includes('{') && errorMessage.includes('}')) {
+        const startIdx = errorMessage.indexOf('{');
+        const endIdx = errorMessage.lastIndexOf('}') + 1;
+        const jsonPart = errorMessage.substring(startIdx, endIdx);
+        const parsed = JSON.parse(jsonPart);
+        if (parsed.error?.message) {
+          return parsed.error.message;
+        } else if (parsed.message) {
+          return parsed.message;
+        }
+      }
+    } catch {
+      // Ignored
+    }
+
+    return errorMessage;
+  }
 }
 

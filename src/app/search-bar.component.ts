@@ -87,50 +87,22 @@ export class SearchBarComponent {
       const result = await this.geminiService.translateSearchQuery(query);
       this.translatedQuery.set(result);
     } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      
-      let hasUserKey = false;
-      if (typeof localStorage !== 'undefined') {
-        const userKey = localStorage.getItem('sila_pdf_translator_user_api_key');
-        if (userKey && userKey.trim() !== '') {
-          hasUserKey = true;
-        }
-      }
+      const parsedError = this.geminiService.parseGeminiError(e);
 
-      if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
-        if (!hasUserKey) {
-          this.toastService.show('error', 'Lỗi: API Key của bạn đã vượt quá giới hạn (Quota exceeded). Vui lòng thử lại sau hoặc sử dụng Key khác.');
-        } else {
-          this.toastService.show('error', 'Lỗi: API Key của bạn đã vượt quá giới hạn (Quota exceeded). Vui lòng thử lại sau hoặc sử dụng Key khác.');
-        }
+      if (parsedError.includes('429') || parsedError.toLowerCase().includes('quota')) {
+        this.toastService.show('error', 'Lỗi: API Key của bạn đã vượt quá giới hạn (Quota exceeded). Vui lòng thử lại sau hoặc sử dụng Key khác.');
       } 
-      else if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+      else if (parsedError.includes('503') || parsedError.toLowerCase().includes('overloaded')) {
         this.toastService.show('error', 'Lỗi: Máy chủ AI hiện đang bận (Overloaded). Vui lòng thử lại sau.');
       }
-      else if (errorMessage.toLowerCase().includes('safety') || errorMessage.toLowerCase().includes('blocked')) {
-        this.toastService.show('error', 'Lỗi: Tài liệu bị từ chối do vi phạm chính sách an toàn của Google.');
+      else if (parsedError.toLowerCase().includes('safety') || parsedError.toLowerCase().includes('blocked')) {
+        this.toastService.show('error', 'Lỗi: Yêu cầu dịch từ khóa bị từ chối do vi phạm chính sách an toàn của Google.');
       }
-      else if (errorMessage.includes('JSON.parse: unexpected character')) {
+      else if (parsedError.includes('JSON.parse: unexpected character')) {
         this.toastService.show('error', 'Lỗi: Máy chủ nhận quá nhiều yêu cầu hoặc phản hồi lỗi. Vui lòng thử lại sau vài giây.');
       }
       else {
-        let simplifiedMsg = errorMessage;
-        try {
-          if (errorMessage.includes('{') && errorMessage.includes('}')) {
-            const startIdx = errorMessage.indexOf('{');
-            const endIdx = errorMessage.lastIndexOf('}') + 1;
-            const jsonPart = errorMessage.substring(startIdx, endIdx);
-            const parsed = JSON.parse(jsonPart);
-            if (parsed.error?.message) {
-              simplifiedMsg = parsed.error.message;
-            } else if (parsed.message) {
-              simplifiedMsg = parsed.message;
-            }
-          }
-        } catch {
-          // Keep original errorMessage
-        }
-        this.toastService.show('error', `Lỗi dịch từ khóa: ${simplifiedMsg}`);
+        this.toastService.show('error', `Lỗi dịch từ khóa: ${parsedError}`);
       }
     } finally {
       this.isSearching.set(false);

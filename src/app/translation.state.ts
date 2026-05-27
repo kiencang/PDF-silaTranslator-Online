@@ -168,8 +168,8 @@ export class TranslationState {
         this.showToast('error', `Lỗi: Nội dung vượt quá giới hạn ${maxTokens.toLocaleString()} tokens (${tokens.toLocaleString()} tokens). Vui lòng cắt bớt trang hoặc giảm dung lượng.`);
       }
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      this.showToast('error', `Lỗi khi kiểm tra dung lượng API Key: ${msg}`);
+      const parsedError = this.geminiService.parseGeminiError(e);
+      this.showToast('error', `Lỗi khi kiểm tra dung lượng tài liệu: ${parsedError}`);
     } finally {
       this.isCountingTokens.set(false);
     }

@@ -89,18 +89,23 @@
           <lucide-icon [img]="Clock" class="w-3.5 h-3.5"></lucide-icon>
           Lịch sử dịch
         </button>
+        <button
+          (click)="openRemix()"
+          class="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg border shadow-sm transition-all duration-150 cursor-pointer bg-emerald-50 border-emerald-100 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 ml-2"
+          title="Xem cách mở ngưỡng miễn phí">
+          <lucide-icon [img]="Copy" class="w-3.5 h-3.5"></lucide-icon>
+          Cách remix ứng dụng
+        </button>
       </div>
 
-      <!-- Center section -->
-      <div class="lg:absolute lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 flex justify-center text-center w-full lg:w-auto">
-        <p class="text-xs text-slate-500 flex flex-wrap items-center justify-center gap-1.5 lg:whitespace-nowrap">
-          <span class="font-medium text-slate-600">v1.0.51</span>
+      <!-- Right section -->
+      <div class="flex items-center justify-center lg:justify-end">
+        <p class="text-xs text-slate-500 flex flex-wrap items-center justify-center lg:justify-end gap-1.5 lg:whitespace-nowrap">
+          <span class="font-medium text-slate-600">v1.0.52</span>
           <span class="text-slate-300 select-none">•</span>
           <a href="https://github.com/kiencang/PDF-silaTranslator-Online" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-700 hover:underline font-medium transition-colors">
             GitHub
           </a>
-          <span class="text-slate-300 select-none">•</span>
-          <span class="text-slate-400 italic">Chỉ dùng cho mục đích cá nhân</span>
           <span class="text-slate-300 select-none">•</span>
           <span class="font-medium text-slate-700">Nguyễn Đức Anh</span>
           <span class="text-slate-300 select-none">•</span>
@@ -111,9 +116,6 @@
           </a>
         </p>
       </div>
-
-      <!-- Right placeholder -->
-      <div class="hidden lg:block w-32"></div>
     </div>
   </footer>
 
@@ -156,5 +158,12 @@
       (clear)="clearApiKey()"
       (closeModal)="closeApiKeyModal()">
     </app-api-key-modal>
+  }
+
+  <!-- Remix Modal -->
+  @if (showRemixModal()) {
+    <app-remix-modal 
+      (closeModal)="closeRemix()">
+    </app-remix-modal>
   }
 </div>

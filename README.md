@@ -14,3 +14,15 @@ Mã nguồn App dịch file PDF từ Anh sang Việt. Triển khai trên AI Stud
 - Bạn nào muốn remix, chỉnh sửa thêm trên AI Studio thì có thể vào đây: https://aistudio.google.com/apps/bb5c61b7-e110-49aa-933c-04c4ccd18e16?showPreview=true&showAssistant=true
 
 Xem thêm Tuyên bố từ chối trách nhiệm: https://github.com/kiencang/PDF-silaTranslator-Online/blob/main/DISCLAIMERS.md
+
+## Ghi công
+
+Công cụ này được hoàn thành dựa vào nhiều thư viện khác. Một số thư viện quan trọng bao gồm:
+
+### 1. Nền tảng
+*   **[Angular](https://angular.dev/)**: Framework Javascript, sản phẩm của Google.
+*   **[Tailwind CSS](https://tailwindcss.com/)**: Chịu trách nhiệm chính cho giao diện.
+*   **[Lucide Angular](https://lucide.dev/)**: Bộ icon.
+
+### 2. PDF core
+*   **[pdf-lib](https://pdf-lib.js.org/)**: Giúp chia tách, cắt ngắn file PDF.

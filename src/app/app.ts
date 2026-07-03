@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, inject, ViewChild, ElementR
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { ToastService } from './toast.service';
-import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, ArrowDown, Maximize, Minimize, Clock, RefreshCw, Info, X, Search, ExternalLink, Scissors, FileEdit, User, Copy, Key, Eye, EyeOff, Trash2 } from 'lucide-angular';
+import { LucideAngularModule, UploadCloud, FileText, Settings, Play, Download, CheckCircle2, AlertCircle, Loader2, ArrowDown, Maximize, Minimize, Clock, RefreshCw, Info, X, Search, ExternalLink, Scissors, FileEdit, User, Copy, Key, Eye, EyeOff, Trash2, LayoutGrid } from 'lucide-angular';
 import { SettingsModalComponent } from './settings-modal.component';
 import { ApiKeyModalComponent } from './api-key-modal.component';
 import { ToastsComponent } from './toasts.component';
@@ -14,13 +14,14 @@ import { ResultSectionComponent } from './result-section.component';
 import { TranslatedDoc } from './storage.service';
 import { HistoryModalComponent } from './history-modal.component';
 import { RemixModalComponent } from './remix-modal.component';
+import { AppsModalComponent } from './apps-modal.component';
 import { TranslationState, TranslationMode } from './translation.state';
 export type { TranslationMode } from './translation.state';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, SettingsModalComponent, ApiKeyModalComponent, ToastsComponent, ResetConfirmModalComponent, HeaderControlsComponent, UploadZoneComponent, ConfigSectionComponent, ResultSectionComponent, HistoryModalComponent, RemixModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, SettingsModalComponent, ApiKeyModalComponent, ToastsComponent, ResetConfirmModalComponent, HeaderControlsComponent, UploadZoneComponent, ConfigSectionComponent, ResultSectionComponent, HistoryModalComponent, RemixModalComponent, AppsModalComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +57,7 @@ export class App {
   readonly Eye = Eye;
   readonly EyeOff = EyeOff;
   readonly Trash2 = Trash2;
+  readonly LayoutGrid = LayoutGrid;
 
   // Form Controls
   modeControl = new FormControl<TranslationMode>('zero_svg', { nonNullable: true });
@@ -70,6 +72,7 @@ export class App {
   showResetConfirm = signal<boolean>(false);
   showHistoryModal = signal<boolean>(false);
   showRemixModal = signal<boolean>(false);
+  showAppsModal = signal<boolean>(false);
   isFullscreen = signal<boolean>(false);
   
   @ViewChild('resetBtn') resetBtn?: ElementRef<HTMLButtonElement>;
@@ -290,6 +293,14 @@ export class App {
 
   closeRemix() {
     this.showRemixModal.set(false);
+  }
+
+  openApps() {
+    this.showAppsModal.set(true);
+  }
+
+  closeApps() {
+    this.showAppsModal.set(false);
   }
 
   deleteHistoryItem(id: number) {

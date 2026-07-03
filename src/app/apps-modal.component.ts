@@ -9,7 +9,7 @@ import { LucideAngularModule, LayoutGrid, X, FileText, Youtube, Globe, ArrowRigh
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" role="dialog" aria-modal="true" aria-labelledby="apps-title">
-      <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-0 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-0 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]">
         <!-- Header -->
         <div class="p-5 border-b border-slate-100 flex items-center justify-between shrink-0">
           <div class="flex items-center gap-3">
@@ -31,7 +31,7 @@ import { LucideAngularModule, LayoutGrid, X, FileText, Youtube, Globe, ArrowRigh
           
           <div class="grid grid-cols-1 gap-4">
             <!-- App 1: Dịch sách dài -->
-            <a href="https://aistudio.google.com/apps/d25924ff-35f1-42f7-9543-f142ecfe037a?showPreview=true&showAssistant=true" 
+            <a href="https://aistudio.google.com/apps/d25924ff-35f1-42f7-9543-f142ecfe037a?showPreview=true&showAssistant=true&fullscreenApplet=true" 
                target="_blank" 
                rel="noopener noreferrer" 
                class="group flex items-start p-4 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-2xl transition-all duration-200 text-left cursor-pointer no-underline focus:outline-none focus:ring-2 focus:ring-indigo-500">

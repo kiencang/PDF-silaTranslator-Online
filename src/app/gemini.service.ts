@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
 
 @Injectable({
   providedIn: 'root'
@@ -76,7 +76,13 @@ export class GeminiService {
     const ai = this.getAiInstance();
     const config: Record<string, unknown> = {
       systemInstruction: { parts: [{ text: systemInstruction }] },
-      thinkingConfig: { thinkingLevel: 'HIGH' }
+      thinkingConfig: { thinkingLevel: 'HIGH' },
+      safetySettings: [
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE }
+      ]
     };
     
     if (useGoogleSearch) {
@@ -121,7 +127,13 @@ export class GeminiService {
     const ai = this.getAiInstance();
     const config: Record<string, unknown> = {
       systemInstruction: { parts: [{ text: systemInstruction }] },
-      thinkingConfig: { thinkingLevel: 'HIGH' }
+      thinkingConfig: { thinkingLevel: 'HIGH' },
+      safetySettings: [
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE }
+      ]
     };
     if (useGoogleSearch) {
       config['tools'] = [{ googleSearch: {} }];
@@ -170,7 +182,13 @@ QUY TẮC BẮT BUỘC TUÂN THỦ:
           { parts: [{ text: prompt }] }
         ],
         config: {
-          systemInstruction: { parts: [{ text: systemInstruction }] }
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          safetySettings: [
+            { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+            { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+            { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+            { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE }
+          ]
         }
       });
 

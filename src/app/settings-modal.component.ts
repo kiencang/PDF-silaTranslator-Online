@@ -14,7 +14,7 @@ import { TranslationMode } from './app';
       <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-0 animate-in zoom-in-95 duration-200 overflow-hidden">
         <div class="p-5 border-b border-slate-100 flex items-center justify-between">
           <h3 id="settings-title" class="text-lg font-semibold text-slate-900">Thay đổi chế độ mặc định</h3>
-          <button (click)="closeModal.emit()" class="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-md p-1 cursor-pointer" aria-label="Đóng cài đặt">
+          <button (click)="closeModal.emit()" class="text-slate-500 hover:text-slate-700 hover:bg-slate-200 transition-colors focus:outline-none rounded-full p-2 cursor-pointer" aria-label="Đóng cài đặt">
             <lucide-icon [img]="X" class="w-5 h-5" aria-hidden="true"></lucide-icon>
           </button>
         </div>

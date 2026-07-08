@@ -28,7 +28,7 @@ import { ToastService } from './toast.service';
             {{ toast.message }}
           </p>
           
-          <button (click)="removeToast(toast.id)" class="shrink-0 p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 cursor-pointer" aria-label="Đóng thông báo">
+          <button (click)="removeToast(toast.id)" class="shrink-0 p-1.5 rounded-full hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors focus:outline-none cursor-pointer" aria-label="Đóng thông báo">
             <lucide-icon [img]="XIcon" class="w-4 h-4" aria-hidden="true"></lucide-icon>
           </button>
         </div>

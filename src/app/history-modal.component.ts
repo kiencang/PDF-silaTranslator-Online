@@ -21,7 +21,7 @@ import { TranslatedDoc } from './storage.service';
               </div>
               <h3 id="history-title" class="text-lg font-semibold text-slate-900">Lịch sử dịch gần đây</h3>
             </div>
-            <button (click)="closeModal.emit()" class="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-lg p-1.5 cursor-pointer shrink-0" aria-label="Đóng">
+            <button (click)="closeModal.emit()" class="text-slate-500 hover:text-slate-700 hover:bg-slate-200 transition-colors focus:outline-none rounded-full p-2 cursor-pointer shrink-0" aria-label="Đóng">
               <lucide-icon [img]="X" class="w-5 h-5" aria-hidden="true"></lucide-icon>
             </button>
           </div>
@@ -90,7 +90,7 @@ import { TranslatedDoc } from './storage.service';
                           Xóa
                         </button>
                         <button (click)="cancelDelete($event)" 
-                                class="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors cursor-pointer" 
+                                class="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-full transition-colors cursor-pointer focus:outline-none" 
                                 title="Hủy">
                           <lucide-icon [img]="X" class="w-3 h-3"></lucide-icon>
                         </button>

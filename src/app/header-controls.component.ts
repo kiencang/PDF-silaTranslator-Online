@@ -54,7 +54,7 @@ import { SearchBarComponent } from './search-bar.component';
               <lucide-icon [img]="User" class="w-4 h-4"></lucide-icon>
               <span>Pro</span>
               <!-- Custom Tooltip for Pro -->
-              <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-56 sm:w-64 p-2.5 bg-slate-800 text-slate-100 text-xs text-center rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none border border-slate-700">
+              <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-56 sm:w-64 p-2.5 bg-slate-800 text-slate-100 text-xs text-left rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none border border-slate-700">
                 <span class="font-semibold text-indigo-300">[Khuyên dùng]</span> - Sử dụng model AI tiên tiến nhất để dịch tài liệu chuyên ngành.
                 <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 border-t border-l border-slate-700 rotate-45 transform origin-center"></div>
               </div>
@@ -74,7 +74,7 @@ import { SearchBarComponent } from './search-bar.component';
               <lucide-icon [img]="Zap" class="w-4 h-4"></lucide-icon>
               <span>Flash</span>
               <!-- Custom Tooltip for Flash -->
-              <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-56 sm:w-64 p-2.5 bg-slate-800 text-slate-100 text-xs text-center rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none border border-slate-700">
+              <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-56 sm:w-64 p-2.5 bg-slate-800 text-slate-100 text-xs text-left rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none border border-slate-700">
                 Model AI nhanh hơn và ngưỡng miễn phí rộng hơn. Thích hợp khi dịch nhiều & nội dung không phức tạp.
                 <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 border-t border-l border-slate-700 rotate-45 transform origin-center"></div>
               </div>

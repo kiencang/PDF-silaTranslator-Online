@@ -11,17 +11,14 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/cdk": "^21.2.5",
     "@angular/common": "^21.0.0",
     "@angular/compiler": "^21.0.0",
     "@angular/core": "^21.0.0",
     "@angular/forms": "^21.2.7",
-    "@angular/material": "^21.2.5",
     "@angular/platform-browser": "^21.0.0",
     "@angular/router": "^21.0.0",
     "@google/genai": "^1.27.0",
     "lucide-angular": "^1.0.0",
-    "motion": "^12.23.24",
     "pdf-lib": "^1.17.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"

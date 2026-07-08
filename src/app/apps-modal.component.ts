@@ -18,7 +18,7 @@ import { LucideAngularModule, LayoutGrid, X, FileText, Youtube, Globe, ArrowRigh
             </div>
             <h3 id="apps-title" class="text-lg font-bold text-slate-900">Các ứng dụng dịch thuật từ Anh sang Việt tiện dùng khác</h3>
           </div>
-          <button (click)="closeModal.emit()" class="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 rounded-md p-1 cursor-pointer" aria-label="Đóng modal">
+          <button (click)="closeModal.emit()" class="text-slate-500 hover:text-slate-700 hover:bg-slate-200 transition-colors focus:outline-none rounded-full p-2 cursor-pointer" aria-label="Đóng modal">
             <lucide-icon [img]="XIcon" class="w-5 h-5"></lucide-icon>
           </button>
         </div>

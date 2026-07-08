@@ -26,7 +26,7 @@ import { TranslationMode } from './app';
               </div>
               <!-- Tooltip -->
               <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden w-[240px] group-hover:block z-50 pointer-events-none">
-                <div class="bg-slate-800 text-white font-normal leading-relaxed text-xs rounded-lg py-2 px-3 shadow-xl relative text-center">
+                <div class="bg-slate-800 text-white font-normal leading-relaxed text-xs rounded-lg py-2 px-3 shadow-xl relative text-left">
                   @if (useGoogleSearchControl.value) {
                     <span class="font-semibold text-emerald-400">[Đang Bật]</span>
                   } @else {

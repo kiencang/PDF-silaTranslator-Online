@@ -1,0 +1,5 @@
+name = "pdf-trans"
+compatibility_date = "2026-07-08"
+
+[assets]
+directory = "./dist"

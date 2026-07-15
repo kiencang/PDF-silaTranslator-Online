@@ -379,7 +379,8 @@ export class TranslationState {
         vietnameseTitle: vietnameseTitle,
         mode: currentMode,
         timestamp: Date.now(),
-        content: content
+        content: content,
+        pdfHash: this.pdfHash() || undefined
       }).catch(err => console.error('Lỗi khi lưu lịch sử:', err));
     }
   }

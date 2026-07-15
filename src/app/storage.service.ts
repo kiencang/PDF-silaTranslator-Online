@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { DbService } from './db.service';
 
 export interface TranslatedDoc {
   id?: number;
@@ -7,6 +8,7 @@ export interface TranslatedDoc {
   mode: string;
   timestamp: number;
   content: string;
+  pdfHash?: string;
 }
 
 @Injectable({
@@ -17,6 +19,8 @@ export class StorageService {
   private storeName = 'translations';
   private db: IDBDatabase | null = null;
   private isBrowser: boolean;
+
+  private dbService = inject(DbService);
 
   constructor() {
     this.isBrowser = typeof window !== 'undefined' && typeof indexedDB !== 'undefined';

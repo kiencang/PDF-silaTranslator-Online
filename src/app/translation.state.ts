@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { GeminiService } from './gemini.service';
 import { ToastService } from './toast.service';
 import { PdfService } from './pdf.service';
+import { DbService } from './db.service';
 import { StorageService, TranslatedDoc } from './storage.service';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -16,6 +17,7 @@ export class TranslationState {
   private http = inject(HttpClient);
   private toastService = inject(ToastService);
   private pdfService = inject(PdfService);
+  private dbService = inject(DbService);
   private storageService = inject(StorageService);
 
   readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -45,6 +47,8 @@ export class TranslationState {
   pdfStartPage = signal<number>(1);
   pdfEndPage = signal<number>(1);
   croppedFile = signal<File | null>(null);
+  pdfHash = signal<string | null>(null);
+  htmlExtractedImages = signal<{id: string, dataUrl: string}[]>([]);
   
   elapsedTime = signal<number>(0);
   isLoadedFromHistory = signal<boolean>(false);
@@ -102,6 +106,7 @@ export class TranslationState {
 
   async processPdfCrop() {
     this.isCountingTokens.set(true);
+    this.pdfHash.set(null);
     try {
       const file = this.selectedFile();
       if (!file) return;
@@ -119,6 +124,21 @@ export class TranslationState {
       this.croppedFile.set(result.croppedFile);
       this.fileBase64.set(result.fileBase64);
       await this.checkTokenLimit(result.fileBase64, file.type);
+
+      // Extract images from the cropped PDF
+      try {
+        const hash = await this.pdfService.hashFile(result.croppedFile);
+        this.pdfHash.set(hash);
+        const extractedImages = await this.pdfService.extractImagesFromPDF(result.croppedFile, hash);
+        
+        // Save images to IndexedDB
+        await this.dbService.clearImagesByPdf(hash);
+        for (const img of extractedImages) {
+           await this.dbService.saveImage(img.id, hash, img.dataUrl);
+        }
+      } catch (err) {
+        console.warn('Lỗi khi trích xuất hình ảnh từ PDF:', err);
+      }
     } catch (error) {
       console.error('Error cropping PDF:', error);
       this.showToast('error', 'Lỗi khi cắt PDF.');
@@ -127,21 +147,45 @@ export class TranslationState {
   }
 
   handleHtmlFile(file: File) {
-    if (file.size > this.MAX_FILE_SIZE_HTML) {
-      this.showToast('error', 'Lỗi: Tệp tải lên vượt quá giới hạn 500KB.');
-      this.resetFileState();
-      return;
-    }
-
     this.resetPartialState(file);
 
     const reader = new FileReader();
     reader.onload = async () => {
       const textContent = reader.result as string;
-      this.fileBase64.set(textContent);
-      await this.checkTokenLimit(textContent, file.type);
+      const { cleanHtml, extractedImages } = this.extractImagesFromHtml(textContent);
+      
+      const encoder = new TextEncoder();
+      const byteLength = encoder.encode(cleanHtml).length;
+      
+      if (byteLength > this.MAX_FILE_SIZE_HTML) {
+        this.showToast('error', 'Lỗi: Tệp HTML (sau khi tách ảnh) vượt quá giới hạn 500KB.');
+        this.resetFileState();
+        return;
+      }
+      
+      this.htmlExtractedImages.set(extractedImages);
+      // store the clean base64 html
+      const cleanBase64 = btoa(unescape(encodeURIComponent(cleanHtml)));
+      this.fileBase64.set(cleanBase64);
+      await this.checkTokenLimit(cleanBase64, file.type);
     };
     reader.readAsText(file);
+  }
+
+  private extractImagesFromHtml(html: string): { cleanHtml: string, extractedImages: { id: string, dataUrl: string }[] } {
+    const extractedImages: { id: string, dataUrl: string }[] = [];
+    let imgCount = 0;
+    
+    const regex = /(?:src|href|data)=(['"])(data:image\/.*?)\1|url\((['"]?)(data:image\/.*?)\3\)/gi;
+    
+    const cleanHtml = html.replace(regex, (match, q1, g1, q2, g2) => {
+      const dataUrl = g1 || g2;
+      const id = `img_placeholder_${crypto.randomUUID()}`;
+      extractedImages.push({ id, dataUrl });
+      return match.replace(dataUrl, id);
+    });
+
+    return { cleanHtml, extractedImages };
   }
 
   private resetFileState() {
@@ -205,6 +249,15 @@ export class TranslationState {
       const base64 = this.fileBase64()!;
       const mime = this.mimeType();
       const currentMode = this.mode();
+      
+      let extractedImages: { id: string, dataUrl: string }[] = [];
+      if (this.pdfHash()) {
+        try {
+          extractedImages = await this.dbService.getImagesByPdf(this.pdfHash()!);
+        } catch (e) {
+          console.warn('Không thể lấy ảnh từ DB', e);
+        }
+      }
 
       if (currentMode === 'zero_math') {
         this.progressMessage.set('Dịch file PDF sang tiếng Việt (Tài liệu khoa học xã hội)...');
@@ -212,8 +265,9 @@ export class TranslationState {
           this.loadPrompt('system_instructions_zero_math.md'),
           this.loadPrompt('prompt_zero_math.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel());
-        this.resultHtml.set(this.extractHtml(result));
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel(), extractedImages);
+        let rawHtml = this.extractHtml(result);
+        this.resultHtml.set(await this.postProcessHtml(rawHtml, extractedImages));
       }
       else if (currentMode === 'zero_svg') {
         this.progressMessage.set('Dịch file PDF sang tiếng Việt (Tài liệu khoa học nói chung)...');
@@ -221,8 +275,9 @@ export class TranslationState {
           this.loadPrompt('system_instructions_zero_svg.md'),
           this.loadPrompt('prompt_zero_svg.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel());
-        this.resultHtml.set(this.extractHtml(result));
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel(), extractedImages);
+        let rawHtml = this.extractHtml(result);
+        this.resultHtml.set(await this.postProcessHtml(rawHtml, extractedImages));
       }
       else if (currentMode === 'normal') {
         this.progressMessage.set('Dịch file PDF sang tiếng Việt (Tài liệu toán chuyên ngành)...');
@@ -230,8 +285,9 @@ export class TranslationState {
           this.loadPrompt('system_instructions.md'),
           this.loadPrompt('prompt.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel());
-        this.resultHtml.set(this.extractHtml(result));
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel(), extractedImages);
+        let rawHtml = this.extractHtml(result);
+        this.resultHtml.set(await this.postProcessHtml(rawHtml, extractedImages));
       }
       else if (currentMode === 'phase1') {
         this.progressMessage.set('Chuyển định dạng PDF sang HTML (English / Giữ nguyên nội dung)...');
@@ -239,8 +295,10 @@ export class TranslationState {
           this.loadPrompt('system_instructions_phase_1.md'),
           this.loadPrompt('prompt_phase_1.md')
         ]);
-        const result = await this.geminiService.translate(base64, mime, prompt, instruction, false, this.selectedModel());
-        this.resultHtml.set(this.extractHtml(result));
+        // Phase 1 might also benefit from images if we want to extract them to HTML. We'll pass them just in case.
+        const result = await this.geminiService.translate(base64, mime, prompt, instruction, false, this.selectedModel(), extractedImages);
+        let rawHtml = this.extractHtml(result);
+        this.resultHtml.set(await this.postProcessHtml(rawHtml, extractedImages));
       }
       else if (currentMode === 'phase2') {
         if (this.selectedFile()?.type !== 'text/html') {
@@ -254,8 +312,9 @@ export class TranslationState {
         ]);
         
         const htmlContent = base64;
-        const result = await this.geminiService.translateHtml(htmlContent, prompt, instruction, this.useGoogleSearch(), this.selectedModel());
-        this.resultHtml.set(this.extractHtml(result));
+        const result = await this.geminiService.translateHtml(htmlContent, prompt, instruction, this.useGoogleSearch(), this.selectedModel(), this.htmlExtractedImages());
+        let rawHtml = this.extractHtml(result);
+        this.resultHtml.set(await this.postProcessHtml(rawHtml, this.htmlExtractedImages()));
       }
 
       this.progressMessage.set('Done!');
@@ -328,6 +387,26 @@ export class TranslationState {
   private extractHtml(text: string): string {
     const match = text.match(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/);
     return match ? match[1] : text;
+  }
+
+  private async postProcessHtml(html: string, extractedImages: { id: string, dataUrl: string }[]): Promise<string> {
+    if (!extractedImages || extractedImages.length === 0) return html;
+    
+    let processedHtml = html;
+    for (const img of extractedImages) {
+      // The AI might output <img src="[ID]" ...> or <img src="ID" ...>
+      // We escape the ID just in case it contains special regex chars
+      const escapedId = img.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      // Match exactly src="ID" or src='ID'
+      const srcRegex = new RegExp(`src=["']\\[?${escapedId}\\]?["']`, 'g');
+      processedHtml = processedHtml.replace(srcRegex, `src="${img.dataUrl}"`);
+      
+      // Fallback: If AI just outputs the ID anywhere else like [IMAGE: ID]
+      const fallbackRegex = new RegExp(`\\[IMAGE:\\s*${escapedId}\\]`, 'g');
+      processedHtml = processedHtml.replace(fallbackRegex, `<img src="${img.dataUrl}" style="max-width: 100%; height: auto;">`);
+    }
+    return processedHtml;
   }
 
   cancelTimer() {

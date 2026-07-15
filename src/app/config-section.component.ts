@@ -116,7 +116,7 @@ import { TranslationMode } from './app';
                 <input type="radio" name="main_mode" [checked]="isTwoPhaseMode" class="mt-1 text-indigo-600 focus:ring-indigo-600" aria-describedby="desc-two-phase" tabindex="-1">
                 <div>
                   <div class="text-sm font-medium text-slate-900">Dịch 2 giai đoạn (cho tài liệu bố cục phức tạp)</div>
-                  <div id="desc-two-phase" class="text-xs text-slate-600 mt-0.5">Chia quá trình dịch thành 2 bước (phase). <strong>Áp dụng được với mọi kiểu tài liệu. Chất lượng dịch thường cao nhất</strong>, nhưng tốn thời gian hơn.</div>
+                  <div id="desc-two-phase" class="text-xs text-slate-600 mt-0.5">Chia quá trình dịch thành 2 bước (phase). <strong>Áp dụng được với mọi kiểu tài liệu. Chất lượng dịch có thể tốt hơn</strong>, nhưng tốn thời gian &amp; token hơn đáng kể (gấp đôi).</div>
                 </div>
               </label>
 

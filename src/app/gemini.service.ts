@@ -71,7 +71,8 @@ export class GeminiService {
     prompt: string,
     systemInstruction: string,
     useGoogleSearch = false,
-    modelName: string = this.MODEL_NAME_PRO
+    modelName: string = this.MODEL_NAME_PRO,
+    images: {id: string, dataUrl: string}[] = []
   ): Promise<string> {
     const ai = this.getAiInstance();
     const config: Record<string, unknown> = {
@@ -89,22 +90,39 @@ export class GeminiService {
       config['tools'] = [{ googleSearch: {} }];
     }
 
+    const parts: any[] = [];
+    
+    // Add the main document
+    const cleanFileData = fileData.includes(',') ? fileData.split(',')[1] : fileData;
+    parts.push({
+      inlineData: {
+        data: cleanFileData,
+        mimeType: mimeType
+      }
+    });
+
+    // Add extracted images
+    for (const img of images) {
+      if (img.dataUrl.includes(',')) {
+        const mime = img.dataUrl.split(';')[0].split(':')[1];
+        const data = img.dataUrl.split(',')[1];
+        parts.push({
+          inlineData: {
+            data: data,
+            mimeType: mime
+          }
+        });
+        parts.push({ text: `(This image has ID: ${img.id})` });
+      }
+    }
+
+    // Add the user prompt
+    parts.push({ text: prompt });
+
     try {
       const response = await ai.models.generateContent({
         model: modelName,
-        contents: [
-          {
-            parts: [
-              {
-                inlineData: {
-                  data: fileData,
-                  mimeType: mimeType
-                }
-              },
-              { text: prompt }
-            ]
-          }
-        ],
+        contents: [{ parts: parts }],
         config
       });
 
@@ -122,7 +140,8 @@ export class GeminiService {
     prompt: string,
     systemInstruction: string,
     useGoogleSearch = false,
-    modelName: string = this.MODEL_NAME_PRO
+    modelName: string = this.MODEL_NAME_PRO,
+    images: {id: string, dataUrl: string}[] = []
   ): Promise<string> {
     const ai = this.getAiInstance();
     const config: Record<string, unknown> = {
@@ -139,17 +158,36 @@ export class GeminiService {
       config['tools'] = [{ googleSearch: {} }];
     }
 
+    const parts: any[] = [];
+    
+    const cleanHtmlContent = htmlContent.includes(',') ? htmlContent.split(',')[1] : htmlContent;
+    parts.push({
+      inlineData: {
+        data: cleanHtmlContent,
+        mimeType: 'text/html'
+      }
+    });
+
+    for (const img of images) {
+      if (img.dataUrl.includes(',')) {
+        const mime = img.dataUrl.split(';')[0].split(':')[1];
+        const data = img.dataUrl.split(',')[1];
+        parts.push({
+          inlineData: {
+            data: data,
+            mimeType: mime
+          }
+        });
+        parts.push({ text: `(This image has ID: ${img.id})` });
+      }
+    }
+
+    parts.push({ text: prompt });
+
     try {
       const response = await ai.models.generateContent({
         model: modelName,
-        contents: [
-          {
-            parts: [
-              { text: htmlContent },
-              { text: prompt }
-            ]
-          }
-        ],
+        contents: [{ parts: parts }],
         config
       });
 

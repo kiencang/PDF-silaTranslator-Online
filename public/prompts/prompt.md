@@ -34,8 +34,15 @@ Trước khi xuất kết quả cuối cùng, tự kiểm tra nội bộ:
 2.  *Mã HTML có rủi ro tràn lề (overflow) hay cấu trúc thẻ sai logic không?* -> Tự động tối ưu lại CSS/HTML.
 </internal_quality_assurance>
 
+<image_handling>
+**[D] XỬ LÝ HÌNH ẢNH TỪ PDF:**
+* Nếu tài liệu PDF gốc có chứa hình ảnh, bạn sẽ nhận được các file ảnh kèm theo với một ID định danh (ví dụ: (This image has ID: ...)).
+* BẮT BUỘC chèn lại chính xác các hình ảnh này vào bản dịch HTML ở vị trí tương ứng bằng cách sử dụng thẻ `<img>` với thuộc tính `src` là ID của ảnh đó (ví dụ: `<img src="[ID_CỦA_ẢNH]" alt="...">`).
+* Đừng bỏ sót ảnh nào nếu nó đóng vai trò quan trọng trong việc truyền tải nội dung của tài liệu.
+</image_handling>
+
 <output_constraints>
-**[D] ĐỊNH DẠNG ĐẦU RA BẮT BUỘC (STRICT OUTPUT BOUNDARY):**
+**[E] ĐỊNH DẠNG ĐẦU RA BẮT BUỘC (STRICT OUTPUT BOUNDARY):**
 *   Chỉ trả về MÃ HTML THÔ.
 *   Bắt đầu chính xác bằng `<!DOCTYPE html>` và kết thúc bằng `</html>`.
 </output_constraints>

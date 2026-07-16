@@ -35,10 +35,9 @@ Trước khi xuất kết quả cuối cùng, tự kiểm tra nội bộ:
 </internal_quality_assurance>
 
 <image_handling>
-**[D] XỬ LÝ HÌNH ẢNH TỪ TÀI LIỆU:**
-* Nếu tài liệu gốc có chứa hình ảnh, bạn sẽ nhận được các file ảnh kèm theo với một ID định danh (ví dụ: (This image has ID: ...)).
-* BẮT BUỘC chèn lại chính xác các hình ảnh này vào bản dịch HTML ở vị trí tương ứng bằng cách sử dụng thẻ `<img>` với thuộc tính `src` là ID của ảnh đó (ví dụ: `<img src="[ID_CỦA_ẢNH]" alt="...">`).
-* Đừng bỏ sót ảnh nào nếu nó đóng vai trò quan trọng trong việc truyền tải nội dung của tài liệu.
+**[D] XỬ LÝ HÌNH ẢNH TRONG TÀI LIỆU:**
+* Nhiệm vụ của bạn là giữ nguyên các thẻ `<img>` và thuộc tính `src` tương ứng của chúng trong mã HTML kết quả.
+* Tuyệt đối KHÔNG thay đổi, sửa đổi, xóa, hoặc bỏ qua bất kỳ thẻ `<img>` hoặc giá trị `src` nào từ mã nguồn gốc. Đảm bảo chúng được giữ nguyên vẹn ở vị trí ban đầu.
 </image_handling>
 
 <output_constraints>

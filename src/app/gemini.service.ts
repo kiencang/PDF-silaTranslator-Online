@@ -168,18 +168,9 @@ export class GeminiService {
       }
     });
 
-    for (const img of images) {
-      if (img.dataUrl.includes(',')) {
-        const mime = img.dataUrl.split(';')[0].split(':')[1];
-        const data = img.dataUrl.split(',')[1];
-        parts.push({
-          inlineData: {
-            data: data,
-            mimeType: mime
-          }
-        });
-        parts.push({ text: `(This image has ID: ${img.id})` });
-      }
+    if (images && images.length > 0) {
+      const ids = images.map(img => img.id).join(', ');
+      parts.push({ text: `Tài liệu HTML này chứa các hình ảnh có ID sau: [${ids}]. Nhiệm vụ của bạn là giữ nguyên các thẻ <img> và thuộc tính src tương ứng của chúng trong mã HTML kết quả.` });
     }
 
     parts.push({ text: prompt });

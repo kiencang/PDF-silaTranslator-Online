@@ -11,7 +11,7 @@ Mã nguồn App dịch file PDF từ Anh sang Việt. Triển khai trên AI Stud
 - Ở phiên bản mới nhất cần tạo API Key miễn phí trên Gemini và nhập vào ứng dụng để dùng.
 - Cập nhật phiên bản online trên Cloudflare.
 - Đọc hướng dẫn cách dùng ở đây: https://pdf-translator.wpsila.com
-- Chương trình sử dụng SI/Prompt đã được tối ưu sẵn ở dự án này: https://github.com/kiencang/SI-Prompt-PDF-EV-Translate (v1.3.43)
+- Chương trình sử dụng SI/Prompt đã được tối ưu sẵn ở dự án này: https://github.com/kiencang/SI-Prompt-PDF-EV-Translate (v1.3.44)
 
 Xem thêm Tuyên bố từ chối trách nhiệm: https://github.com/kiencang/PDF-silaTranslator-Online/blob/main/DISCLAIMERS.md
 

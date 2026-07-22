@@ -18,7 +18,7 @@ export class GeminiService {
         });
       }
     }
-    throw new Error('Vui lòng thiết lập "API Key cá nhân" trong phần Cấu hình để sử dụng ứng dụng (phiên bản Client-side bắt buộc sử dụng Key riêng).');
+    throw new Error('Vui lòng thiết lập "API Key cá nhân" trong phần "Nhập API Key" (nằm ngay dưới logo) để sử dụng ứng dụng.');
   }
 
   async countTokens(fileData: string, mimeType: string): Promise<number> {

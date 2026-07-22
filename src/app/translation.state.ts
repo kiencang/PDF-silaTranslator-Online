@@ -4,8 +4,8 @@ import { ToastService } from './toast.service';
 import { PdfService } from './pdf.service';
 import { DbService } from './db.service';
 import { StorageService, TranslatedDoc } from './storage.service';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { PromptService } from './prompt.service';
+import { ImageProcessorService, ExtractedImage } from './image-processor.service';
 
 export type TranslationMode = 'zero_math' | 'zero_svg' | 'normal' | 'phase1' | 'phase2';
 
@@ -14,17 +14,17 @@ export type TranslationMode = 'zero_math' | 'zero_svg' | 'normal' | 'phase1' | '
 })
 export class TranslationState {
   private geminiService = inject(GeminiService);
-  private http = inject(HttpClient);
   private toastService = inject(ToastService);
   private pdfService = inject(PdfService);
   private dbService = inject(DbService);
   private storageService = inject(StorageService);
+  private promptService = inject(PromptService);
+  private imageProcessorService = inject(ImageProcessorService);
 
   readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   readonly MAX_FILE_SIZE_HTML = 0.5 * 1024 * 1024; // 500KB
   readonly MAX_PDF_TOKENS = 25000;
   readonly MAX_HTML_TOKENS = 35000;
-  private promptCache = new Map<string, string>();
 
   selectedModel = signal<'gemini-pro-latest' | 'gemini-flash-latest'>('gemini-flash-latest');
   selectedFile = signal<File | null>(null);
@@ -48,7 +48,7 @@ export class TranslationState {
   pdfEndPage = signal<number>(1);
   croppedFile = signal<File | null>(null);
   pdfHash = signal<string | null>(null);
-  htmlExtractedImages = signal<{id: string, dataUrl: string}[]>([]);
+  htmlExtractedImages = signal<ExtractedImage[]>([]);
   
   elapsedTime = signal<number>(0);
   isLoadedFromHistory = signal<boolean>(false);
@@ -152,7 +152,7 @@ export class TranslationState {
     const reader = new FileReader();
     reader.onload = async () => {
       const textContent = reader.result as string;
-      const { cleanHtml, extractedImages } = this.extractImagesFromHtml(textContent);
+      const { cleanHtml, extractedImages } = this.imageProcessorService.extractImagesFromHtml(textContent);
       
       const encoder = new TextEncoder();
       const byteLength = encoder.encode(cleanHtml).length;
@@ -170,22 +170,6 @@ export class TranslationState {
       await this.checkTokenLimit(cleanBase64, file.type);
     };
     reader.readAsText(file);
-  }
-
-  private extractImagesFromHtml(html: string): { cleanHtml: string, extractedImages: { id: string, dataUrl: string }[] } {
-    const extractedImages: { id: string, dataUrl: string }[] = [];
-    let imgCount = 0;
-    
-    const regex = /(?:src|href|data)=(['"])(data:image\/.*?)\1|url\((['"]?)(data:image\/.*?)\3\)/gi;
-    
-    const cleanHtml = html.replace(regex, (match, q1, g1, q2, g2) => {
-      const dataUrl = g1 || g2;
-      const id = `img_placeholder_${crypto.randomUUID()}`;
-      extractedImages.push({ id, dataUrl });
-      return match.replace(dataUrl, id);
-    });
-
-    return { cleanHtml, extractedImages };
   }
 
   private resetFileState() {
@@ -220,17 +204,7 @@ export class TranslationState {
   }
 
   async loadPrompt(filename: string): Promise<string> {
-    if (this.promptCache.has(filename)) {
-      return this.promptCache.get(filename)!;
-    }
-    try {
-      const content = await firstValueFrom(this.http.get(`/prompts/${filename}`, { responseType: 'text' }));
-      this.promptCache.set(filename, content);
-      return content;
-    } catch (e) {
-      console.error(`Không thể tải prompt ${filename}`, e);
-      throw new Error(`Không thể tải system instruction: ${filename}`);
-    }
+    return this.promptService.loadPrompt(filename);
   }
 
   async processFile() {
@@ -250,7 +224,7 @@ export class TranslationState {
       const mime = this.mimeType();
       const currentMode = this.mode();
       
-      let extractedImages: { id: string, dataUrl: string }[] = [];
+      let extractedImages: ExtractedImage[] = [];
       if (this.pdfHash()) {
         try {
           extractedImages = await this.dbService.getImagesByPdf(this.pdfHash()!);
@@ -266,8 +240,8 @@ export class TranslationState {
           this.loadPrompt('prompt_zero_math.md')
         ]);
         const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel(), extractedImages);
-        let rawHtml = this.extractHtml(result);
-        this.resultHtml.set(await this.postProcessHtml(rawHtml, extractedImages));
+        const rawHtml = this.imageProcessorService.extractHtml(result);
+        this.resultHtml.set(this.imageProcessorService.postProcessHtml(rawHtml, extractedImages));
       }
       else if (currentMode === 'zero_svg') {
         this.progressMessage.set('Dịch file PDF sang tiếng Việt (Tài liệu khoa học nói chung)...');
@@ -276,8 +250,8 @@ export class TranslationState {
           this.loadPrompt('prompt_zero_svg.md')
         ]);
         const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel(), extractedImages);
-        let rawHtml = this.extractHtml(result);
-        this.resultHtml.set(await this.postProcessHtml(rawHtml, extractedImages));
+        const rawHtml = this.imageProcessorService.extractHtml(result);
+        this.resultHtml.set(this.imageProcessorService.postProcessHtml(rawHtml, extractedImages));
       }
       else if (currentMode === 'normal') {
         this.progressMessage.set('Dịch file PDF sang tiếng Việt (Tài liệu toán chuyên ngành)...');
@@ -286,8 +260,8 @@ export class TranslationState {
           this.loadPrompt('prompt.md')
         ]);
         const result = await this.geminiService.translate(base64, mime, prompt, instruction, this.useGoogleSearch(), this.selectedModel(), extractedImages);
-        let rawHtml = this.extractHtml(result);
-        this.resultHtml.set(await this.postProcessHtml(rawHtml, extractedImages));
+        const rawHtml = this.imageProcessorService.extractHtml(result);
+        this.resultHtml.set(this.imageProcessorService.postProcessHtml(rawHtml, extractedImages));
       }
       else if (currentMode === 'phase1') {
         this.progressMessage.set('Chuyển định dạng PDF sang HTML (English / Giữ nguyên nội dung)...');
@@ -295,10 +269,9 @@ export class TranslationState {
           this.loadPrompt('system_instructions_phase_1.md'),
           this.loadPrompt('prompt_phase_1.md')
         ]);
-        // Phase 1 might also benefit from images if we want to extract them to HTML. We'll pass them just in case.
         const result = await this.geminiService.translate(base64, mime, prompt, instruction, false, this.selectedModel(), extractedImages);
-        let rawHtml = this.extractHtml(result);
-        this.resultHtml.set(await this.postProcessHtml(rawHtml, extractedImages));
+        const rawHtml = this.imageProcessorService.extractHtml(result);
+        this.resultHtml.set(this.imageProcessorService.postProcessHtml(rawHtml, extractedImages));
       }
       else if (currentMode === 'phase2') {
         if (this.selectedFile()?.type !== 'text/html') {
@@ -313,8 +286,8 @@ export class TranslationState {
         
         const htmlContent = base64;
         const result = await this.geminiService.translateHtml(htmlContent, prompt, instruction, this.useGoogleSearch(), this.selectedModel(), this.htmlExtractedImages());
-        let rawHtml = this.extractHtml(result);
-        this.resultHtml.set(await this.postProcessHtml(rawHtml, this.htmlExtractedImages()));
+        const rawHtml = this.imageProcessorService.extractHtml(result);
+        this.resultHtml.set(this.imageProcessorService.postProcessHtml(rawHtml, this.htmlExtractedImages()));
       }
 
       this.progressMessage.set('Done!');
@@ -383,31 +356,6 @@ export class TranslationState {
         pdfHash: this.pdfHash() || undefined
       }).catch(err => console.error('Lỗi khi lưu lịch sử:', err));
     }
-  }
-
-  private extractHtml(text: string): string {
-    const match = text.match(/```[a-zA-Z]*\s*([\s\S]*?)\s*```/);
-    return match ? match[1] : text;
-  }
-
-  private async postProcessHtml(html: string, extractedImages: { id: string, dataUrl: string }[]): Promise<string> {
-    if (!extractedImages || extractedImages.length === 0) return html;
-    
-    let processedHtml = html;
-    for (const img of extractedImages) {
-      // The AI might output <img src="[ID]" ...> or <img src="ID" ...>
-      // We escape the ID just in case it contains special regex chars
-      const escapedId = img.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      
-      // Match exactly src="ID" or src='ID'
-      const srcRegex = new RegExp(`src=["']\\[?${escapedId}\\]?["']`, 'g');
-      processedHtml = processedHtml.replace(srcRegex, `src="${img.dataUrl}"`);
-      
-      // Fallback: If AI just outputs the ID anywhere else like [IMAGE: ID]
-      const fallbackRegex = new RegExp(`\\[IMAGE:\\s*${escapedId}\\]`, 'g');
-      processedHtml = processedHtml.replace(fallbackRegex, `<img src="${img.dataUrl}" style="max-width: 100%; height: auto;">`);
-    }
-    return processedHtml;
   }
 
   cancelTimer() {

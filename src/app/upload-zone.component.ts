@@ -63,8 +63,9 @@ import { LucideAngularModule, RefreshCw, UploadCloud, CheckCircle2, Scissors, Lo
                   <span class="block">Kéo thả vào đây</span>
                 </p>
                 <p class="text-xs text-slate-600 mt-2">
-                  <span class="block">PDF (max 25 trang / 10MB / 25K token)</span>
+                  <span class="block">PDF (max 25 - 40 trang / 10MB / 18K từ / 25K token)</span>
                   <span class="block">HTML (max 0.5 MB / 35K token)</span>
+                  <span class="block mt-1 text-[11px] text-slate-500">[Giới hạn số lượng trang, số từ chỉ là ước đoán nhanh gọn, công cụ dựa vào lượng token đầu vào, dung lượng của file để đặt giới hạn]</span>
                 </p>
               </div>
             </div>

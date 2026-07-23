@@ -190,7 +190,7 @@ export class App {
     if (keyVal) {
       this.showToast('success', 'Đã lưu cấu hình API Key cá nhân của bạn!');
     } else {
-      this.showToast('info', 'Bạn chưa cấu hình API Key. Ứng dụng client-side sẽ cần Key này để hoạt động.');
+      this.showToast('info', 'Bạn chưa nhập API Key.');
     }
   }
 

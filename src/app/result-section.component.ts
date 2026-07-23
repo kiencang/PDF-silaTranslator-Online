@@ -71,7 +71,7 @@ import { LucideAngularModule, Download, Maximize, Minimize, Loader2, Clock, File
               <lucide-icon [img]="FileTextIcon" class="w-12 h-12 text-indigo-300" aria-hidden="true"></lucide-icon>
             </div>
             <h3 class="text-lg font-semibold text-slate-700 mb-2">Khu vực hiển thị kết quả</h3>
-            <p class="text-sm text-slate-500 max-w-sm">Bản dịch/chuyển đổi định dạng của bạn sẽ xuất hiện tại đây. Bạn có thể tải về để lưu trữ sau khi hoàn tất.</p>
+            <p class="text-sm text-slate-500 max-w-md">Bản dịch/chuyển đổi định dạng của bạn sẽ xuất hiện tại đây. Bạn có thể tải về để lưu trữ sau khi hoàn tất... Ngoài ra công cụ tự động lưu trữ 10 bản dịch gần nhất ở mục "Lịch sử dịch".</p>
           </div>
         }
 

@@ -19,7 +19,7 @@ import { TranslatedDoc } from './storage.service';
               <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
                 <lucide-icon [img]="Clock" class="w-4 h-4"></lucide-icon>
               </div>
-              <h3 id="history-title" class="text-lg font-semibold text-slate-900">Lịch sử dịch gần đây</h3>
+              <h3 id="history-title" class="text-lg font-semibold text-slate-900">Lịch sử dịch/chuyển đổi gần đây</h3>
             </div>
             <button (click)="closeModal.emit()" class="text-slate-500 hover:text-slate-700 hover:bg-slate-200 transition-colors focus:outline-none rounded-full p-2 cursor-pointer shrink-0" aria-label="Đóng">
               <lucide-icon [img]="X" class="w-5 h-5" aria-hidden="true"></lucide-icon>
@@ -71,6 +71,15 @@ import { TranslatedDoc } from './storage.service';
                               }">
                           {{ getModeLabel(item.mode) }}
                         </span>
+                        @if (item.model) {
+                          <span class="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full"
+                                [ngClass]="{
+                                  'bg-purple-50 text-purple-700 border border-purple-200/50': item.model.includes('pro'),
+                                  'bg-amber-50 text-amber-700 border border-amber-200/50': item.model.includes('flash')
+                                }">
+                            {{ getModelLabel(item.model) }}
+                          </span>
+                        }
                         <span class="text-[11px] text-slate-400 flex items-center gap-1">
                           <lucide-icon [img]="Clock" class="w-3 h-3"></lucide-icon>
                           {{ formatDate(item.timestamp) }}
@@ -141,6 +150,13 @@ export class HistoryModalComponent {
       case 'phase2': return 'Dịch HTML (Phase 2)';
       default: return mode;
     }
+  }
+
+  getModelLabel(model?: string): string {
+    if (!model) return '';
+    if (model.includes('pro')) return 'Model Pro';
+    if (model.includes('flash')) return 'Model Flash';
+    return model;
   }
 
   formatDate(timestamp: number): string {

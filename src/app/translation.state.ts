@@ -351,6 +351,7 @@ export class TranslationState {
         originalFileName: file.name,
         vietnameseTitle: vietnameseTitle,
         mode: currentMode,
+        model: this.selectedModel(),
         timestamp: Date.now(),
         content: content,
         pdfHash: this.pdfHash() || undefined

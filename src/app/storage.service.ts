@@ -6,6 +6,7 @@ export interface TranslatedDoc {
   originalFileName: string;
   vietnameseTitle: string;
   mode: string;
+  model?: string;
   timestamp: number;
   content: string;
   pdfHash?: string;
